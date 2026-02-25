@@ -1,0 +1,2276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SmartSchool AI — Student Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#050c14;--bgc:#0a1628;--bgc2:#0d1c32;--bgs:#07101e;
+  --bd:#1a2d47;--bdg:#1e3a5f;
+  --tl:#00c9b1;--tld:#00c9b118;--tlm:#00c9b144;
+  --am:#f5a623;--amd:#f5a62318;
+  --rd:#ff4757;--rdd:#ff475718;
+  --bl:#4fc3f7;--bld:#4fc3f712;
+  --gn:#26d98b;--gnd:#26d98b15;
+  --pu:#a78bfa;--pud:#a78bfa15;
+  --pk:#f472b6;--pkd:#f472b615;
+  --tp:#e8f0fe;--ts:#7a9cc0;--tm:#3d5878;
+  --fd:'Outfit',sans-serif;--fm:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tp);font-family:var(--fd);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,201,177,.025)1px,transparent 1px),linear-gradient(90deg,rgba(0,201,177,.025)1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spinRing{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px var(--tlm)}50%{box-shadow:0 0 40px var(--tl)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
+
+/* ══════════════════════════════════════
+   AUTH SCREEN
+══════════════════════════════════════ */
+#auth-screen{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:var(--bg);overflow-y:auto;padding:20px}
+#auth-screen.hidden{display:none}
+.auth-wrap{width:100%;max-width:460px;animation:fadeUp .5s ease both}
+.auth-logo{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:32px}
+.auth-mark{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--tl),#0097a7);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 30px var(--tlm);animation:glow 3s ease-in-out infinite}
+.auth-brand{font-size:22px;font-weight:800;color:var(--tp)}
+.auth-brand span{color:var(--tl)}
+.auth-card{background:var(--bgc);border:1px solid var(--bdg);border-radius:20px;padding:32px;position:relative;overflow:hidden}
+.auth-card::before{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,201,177,.06),transparent 70%);pointer-events:none}
+.auth-tabs{display:flex;gap:4px;margin-bottom:28px;background:var(--bg);border-radius:10px;padding:4px}
+.auth-tab{flex:1;padding:9px;border-radius:7px;font-size:13px;font-weight:600;text-align:center;cursor:pointer;transition:all .2s;color:var(--ts)}
+.auth-tab.active{background:linear-gradient(135deg,var(--tl),#009688);color:#fff;box-shadow:0 0 16px var(--tlm)}
+.auth-title{font-size:20px;font-weight:800;margin-bottom:4px}
+.auth-sub{font-size:12px;color:var(--ts);margin-bottom:22px;font-family:var(--fm)}
+.auth-form{display:flex;flex-direction:column;gap:14px}
+.auth-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.auth-fgrp{display:flex;flex-direction:column;gap:5px}
+.auth-fgrp.full{grid-column:1/-1}
+.auth-lbl{font-size:9px;letter-spacing:.12em;color:var(--tm);font-family:var(--fm);text-transform:uppercase}
+.auth-inp{padding:10px 14px;border-radius:9px;font-size:13px;background:var(--bg);border:1px solid var(--bd);color:var(--tp);outline:none;font-family:var(--fd);transition:all .2s;width:100%}
+.auth-inp:focus{border-color:var(--tlm);box-shadow:0 0 0 3px var(--tld)}
+.auth-inp::placeholder{color:var(--tm)}
+.auth-sel{padding:10px 14px;border-radius:9px;font-size:13px;background:var(--bg);border:1px solid var(--bd);color:var(--tp);outline:none;font-family:var(--fd);transition:all .2s;width:100%;cursor:pointer}
+.auth-sel:focus{border-color:var(--tlm)}
+.auth-sel option{background:#0a1628}
+.auth-btn{padding:13px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:700;font-family:var(--fd);background:linear-gradient(135deg,var(--tl),#009688);color:#fff;transition:all .2s;box-shadow:0 0 20px var(--tlm);letter-spacing:.03em;margin-top:4px}
+.auth-btn:hover{transform:translateY(-1px);box-shadow:0 0 32px var(--tlm)}
+.auth-err{font-size:11px;color:var(--rd);font-family:var(--fm);text-align:center;display:none;padding:8px;border-radius:7px;background:var(--rdd);border:1px solid rgba(255,71,87,.3)}
+.auth-ok{font-size:11px;color:var(--gn);font-family:var(--fm);text-align:center;display:none;padding:8px;border-radius:7px;background:var(--gnd);border:1px solid rgba(38,217,139,.3)}
+
+/* ══════════════════════════════════════
+   MAIN APP
+══════════════════════════════════════ */
+#app{display:none}
+#app.show{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* ── SIDEBAR ── */
+.sidebar{width:240px;min-height:100vh;background:var(--bgs);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:50;overflow-y:auto;transition:transform .3s}
+.sb-logo{padding:18px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px}
+.sb-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--tl),#0097a7);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 20px var(--tlm);flex-shrink:0}
+.sb-name{font-size:13px;font-weight:700;color:var(--tp)}
+.sb-sub{font-size:9px;color:var(--tm);letter-spacing:.12em;font-family:var(--fm);text-transform:uppercase}
+.sb-sec{padding:16px 12px 6px}
+.sb-lbl{font-size:9px;color:var(--tm);letter-spacing:.15em;text-transform:uppercase;font-family:var(--fm);padding:0 8px;margin-bottom:5px}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:var(--ts);cursor:pointer;transition:all .18s;margin-bottom:2px;border:1px solid transparent;user-select:none}
+.ni:hover{background:var(--bgc);color:var(--tp)}
+.ni.active{background:var(--tld);color:var(--tl);border-color:var(--tlm)}
+.ni .ico{width:18px;text-align:center;font-size:15px}
+.ni .bdg{margin-left:auto;font-size:9px;background:var(--rd);color:#fff;padding:1px 6px;border-radius:10px;font-family:var(--fm);font-weight:600}
+.sb-bot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--bd)}
+.stu-chip{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--bgc);border:1px solid var(--bdg);cursor:pointer;transition:all .2s}
+.stu-chip:hover{border-color:var(--tlm)}
+.stu-av{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#1a3a5c,#0d2040);display:flex;align-items:center;justify-content:center;font-size:14px;border:1px solid var(--bdg);flex-shrink:0;overflow:hidden}
+.stu-av img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.stu-nm{font-size:11px;font-weight:600;color:var(--tp)}
+.stu-tp{font-size:9px;color:var(--tm);font-family:var(--fm)}
+.sb-logout{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;font-size:11px;color:var(--rd);cursor:pointer;transition:all .2s;margin-top:6px;font-family:var(--fm)}
+.sb-logout:hover{background:var(--rdd)}
+
+/* ── MAIN ── */
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(5,12,20,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.pg-title{font-size:16px;font-weight:700;color:var(--tp)}
+.pg-bc{font-size:11px;color:var(--tm);font-family:var(--fm)}
+.tb-r{display:flex;align-items:center;gap:12px}
+.s-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-family:var(--fm);background:var(--gnd);border:1px solid #26d98b40;color:var(--gn)}
+.s-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gn);animation:pulse 2s infinite}
+.t-badge{padding:5px 12px;border-radius:6px;font-size:11px;background:var(--bgc);border:1px solid var(--bd);color:var(--ts);font-family:var(--fm)}
+.btn-a{padding:7px 16px;border-radius:8px;font-size:12px;background:linear-gradient(135deg,var(--tl),#009688);border:none;color:#fff;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:all .2s;font-family:var(--fd);box-shadow:0 0 16px var(--tlm)}
+.btn-a:hover{transform:translateY(-1px)}
+.content{padding:24px;flex:1}
+
+/* ── TAB VIEWS ── */
+.tv{display:none;animation:fadeUp .35s ease both}
+.tv.on{display:block}
+
+/* ── SHARED COMPONENTS ── */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-t{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--tm);font-family:var(--fm);display:flex;align-items:center;gap:8px}
+.sec-t::before{content:'';display:block;width:14px;height:2px;background:var(--tl);border-radius:2px}
+.pnl{background:var(--bgc);border:1px solid var(--bd);border-radius:14px;padding:20px;animation:fadeUp .5s ease both}
+.pnl-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.pnl-t{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ts);font-family:var(--fm);display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%}
+.dot.tl{background:var(--tl);box-shadow:0 0 6px var(--tl)}.dot.am{background:var(--am);box-shadow:0 0 6px var(--am)}.dot.rd{background:var(--rd);box-shadow:0 0 6px var(--rd)}.dot.gn{background:var(--gn);box-shadow:0 0 6px var(--gn)}.dot.bl{background:var(--bl);box-shadow:0 0 6px var(--bl)}.dot.pu{background:var(--pu);box-shadow:0 0 6px var(--pu)}.dot.pk{background:var(--pk);box-shadow:0 0 6px var(--pk)}
+.ch-w{position:relative;height:200px}
+.ch-w.sm{height:160px}
+.ch-w.lg{height:270px}
+.pb{height:6px;border-radius:3px;background:var(--bd);overflow:hidden}
+.pf{height:100%;border-radius:3px;transition:width 1.4s cubic-bezier(.17,.67,.35,1.2)}
+.pf.tl{background:linear-gradient(90deg,#009688,var(--tl))}.pf.am{background:linear-gradient(90deg,#e67e22,var(--am))}.pf.rd{background:linear-gradient(90deg,#c0392b,var(--rd))}.pf.bl{background:linear-gradient(90deg,#2196F3,var(--bl))}.pf.gn{background:linear-gradient(90deg,#16a085,var(--gn))}.pf.pu{background:linear-gradient(90deg,#6c3483,var(--pu))}.pf.pk{background:linear-gradient(90deg,#be185d,var(--pk))}
+.stag{font-size:9px;font-family:var(--fm);padding:3px 8px;border-radius:4px;letter-spacing:.08em}
+.stag.ok{background:var(--gnd);color:var(--gn);border:1px solid #26d98b30}.stag.wn{background:var(--amd);color:var(--am);border:1px solid #f5a62330}.stag.cr{background:var(--rdd);color:var(--rd);border:1px solid #ff475730}
+.tag{font-size:10px;padding:3px 10px;border-radius:20px;font-weight:500;letter-spacing:.04em}
+.tag.science{background:var(--gnd);color:var(--gn);border:1px solid rgba(38,217,139,.25)}
+.tag.math{background:var(--bld);color:var(--bl);border:1px solid rgba(79,195,247,.25)}
+.tag.topper{background:var(--amd);color:var(--am);border:1px solid rgba(245,166,35,.25)}
+.tag.sports{background:var(--pkd);color:var(--pk);border:1px solid rgba(244,114,182,.25)}
+.tag.ncc{background:var(--pud);color:var(--pu);border:1px solid rgba(167,139,250,.25)}
+.tag.art{background:rgba(244,114,182,.12);color:var(--pk);border:1px solid rgba(244,114,182,.25)}
+
+/* ══════════════════════════════════════
+   PROFILE / DASHBOARD HERO
+══════════════════════════════════════ */
+.hero{display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:start;margin-bottom:24px;padding:24px;border-radius:20px;background:linear-gradient(135deg,#091a2e 0%,#0c2240 40%,#091828 100%);border:1px solid var(--bdg);position:relative;overflow:hidden;animation:fadeUp .5s ease both}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,201,177,.07),transparent 70%);pointer-events:none}
+.avatar-wrap{position:relative;flex-shrink:0}
+.avatar{width:90px;height:90px;border-radius:18px;background:linear-gradient(135deg,#1a3a5c,#0d2040);border:2px solid var(--bdg);display:flex;align-items:center;justify-content:center;font-size:34px;position:relative;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar-ring{position:absolute;inset:-4px;border-radius:22px;border:2px solid transparent;background:linear-gradient(135deg,var(--tl),var(--pu)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:destination-out;mask-composite:exclude;animation:spinRing 8s linear infinite}
+.status-dot{position:absolute;bottom:5px;right:5px;width:12px;height:12px;border-radius:50%;background:var(--gn);border:2px solid #091a2e;box-shadow:0 0 8px var(--gn)}
+.student-info{min-width:0}
+.stu-top{display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+.stu-name{font-size:26px;font-weight:800;color:var(--tp);letter-spacing:-.01em;line-height:1}
+.stu-badge{font-size:10px;font-family:var(--fm);padding:3px 10px;border-radius:6px;background:var(--tld);color:var(--tl);border:1px solid var(--tlm);letter-spacing:.08em}
+.stu-rank-badge{font-size:10px;font-family:var(--fm);padding:3px 10px;border-radius:6px;background:var(--amd);color:var(--am);border:1px solid rgba(245,166,35,.3)}
+.stu-meta{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px}
+.stu-meta-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ts)}
+.stu-meta-item .lbl{color:var(--tm);font-family:var(--fm);font-size:10px}
+.stu-tags{display:flex;gap:8px;flex-wrap:wrap}
+.score-cluster{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.score-big{text-align:center;padding:14px 20px;border-radius:14px;background:rgba(0,201,177,.06);border:1px solid var(--tlm);min-width:100px}
+.score-big .val{font-size:36px;font-weight:900;font-family:var(--fm);color:var(--tl);line-height:1}
+.score-big .sub{font-size:9px;color:var(--tm);font-family:var(--fm);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.score-mini-row{display:flex;gap:8px}
+.score-mini{text-align:center;padding:9px 12px;border-radius:10px;background:var(--bgc);border:1px solid var(--bd);min-width:60px}
+.score-mini .v{font-size:16px;font-weight:700;font-family:var(--fm);line-height:1}
+.score-mini .l{font-size:8px;color:var(--tm);font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+
+/* ── QUICK STATS ── */
+.qstats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.qs{border-radius:12px;padding:14px;background:var(--bgc);border:1px solid var(--bd);position:relative;overflow:hidden;transition:transform .2s,border-color .2s;animation:fadeUp .4s ease both}
+.qs:hover{transform:translateY(-3px);border-color:var(--bdg)}
+.qs::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.qs.tl::before{background:linear-gradient(90deg,transparent,var(--tl),transparent)}
+.qs.am::before{background:linear-gradient(90deg,transparent,var(--am),transparent)}
+.qs.gn::before{background:linear-gradient(90deg,transparent,var(--gn),transparent)}
+.qs.bl::before{background:linear-gradient(90deg,transparent,var(--bl),transparent)}
+.qs.pu::before{background:linear-gradient(90deg,transparent,var(--pu),transparent)}
+.qs-ico{font-size:20px;margin-bottom:8px}
+.qs-val{font-size:24px;font-weight:800;font-family:var(--fm);line-height:1;margin-bottom:3px}
+.qs-val.tl{color:var(--tl)}.qs-val.am{color:var(--am)}.qs-val.gn{color:var(--gn)}.qs-val.bl{color:var(--bl)}.qs-val.pu{color:var(--pu)}
+.qs-lbl{font-size:9px;color:var(--tm);font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase}
+.qs-trend{font-size:10px;margin-top:5px;font-family:var(--fm)}
+.qs-trend.up{color:var(--gn)}.qs-trend.dn{color:var(--rd)}.qs-trend.eq{color:var(--tm)}
+
+/* ── SUBJECT BARS ── */
+.subj-list{display:flex;flex-direction:column;gap:12px}
+.subj-row{display:flex;flex-direction:column;gap:5px}
+.subj-meta{display:flex;justify-content:space-between;align-items:center}
+.subj-name{font-size:12px;color:var(--tp);font-weight:500;display:flex;align-items:center;gap:8px}
+.subj-score{font-size:12px;font-family:var(--fm)}
+.subj-grades{font-size:10px;color:var(--tm);font-family:var(--fm)}
+
+/* ── RESOURCE CARDS ── */
+.cg{display:grid;gap:16px;margin-bottom:20px}
+.cg3{grid-template-columns:repeat(3,1fr)}
+.cg4{grid-template-columns:repeat(4,1fr)}
+.mc{border-radius:12px;padding:18px;background:var(--bgc);border:1px solid var(--bd);position:relative;overflow:hidden;transition:transform .2s}
+.mc:hover{transform:translateY(-2px)}
+.mc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.mc.tl::after{background:linear-gradient(90deg,transparent,var(--tl),transparent)}
+.mc.am::after{background:linear-gradient(90deg,transparent,var(--am),transparent)}
+.mc.rd::after{background:linear-gradient(90deg,transparent,var(--rd),transparent)}
+.mc.bl::after{background:linear-gradient(90deg,transparent,var(--bl),transparent)}
+.mc.gn::after{background:linear-gradient(90deg,transparent,var(--gn),transparent)}
+.mc.pu::after{background:linear-gradient(90deg,transparent,var(--pu),transparent)}
+.mc-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.mc-lbl{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--tm);font-family:var(--fm)}
+.mc-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.mc-ico.tl{background:var(--tld)}.mc-ico.am{background:var(--amd)}.mc-ico.rd{background:var(--rdd)}.mc-ico.bl{background:var(--bld)}.mc-ico.gn{background:var(--gnd)}.mc-ico.pu{background:var(--pud)}
+.mc-v{font-size:30px;font-weight:800;line-height:1;font-family:var(--fm);margin-bottom:4px}
+.mc-v.tl{color:var(--tl)}.mc-v.am{color:var(--am)}.mc-v.rd{color:var(--rd)}.mc-v.bl{color:var(--bl)}.mc-v.gn{color:var(--gn)}.mc-v.pu{color:var(--pu)}
+.mc-sub{font-size:11px;color:var(--ts);margin-bottom:10px}
+.mc-ft{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.mc-pct{font-size:11px;font-family:var(--fm);color:var(--tm)}
+
+/* ══════════════════════════════════════
+   AI ANALYSER FEATURE
+══════════════════════════════════════ */
+.ai-analyser-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:8px}
+@media(max-width:900px){.ai-analyser-wrap{grid-template-columns:1fr}}
+
+.ai-input-card,.ai-output-card{display:flex;flex-direction:column;gap:0}
+
+/* Form */
+.ai-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ai-fgrp{display:flex;flex-direction:column;gap:4px}
+.ai-lbl{font-size:9px;letter-spacing:.13em;color:var(--tm);font-family:var(--fm);text-transform:uppercase}
+.ai-inp{padding:9px 12px;border-radius:8px;font-size:12px;background:var(--bg);border:1px solid var(--bd);color:var(--tp);outline:none;font-family:var(--fd);transition:all .2s;width:100%}
+.ai-inp:focus{border-color:var(--tlm);box-shadow:0 0 0 3px var(--tld)}
+.ai-inp::placeholder{color:var(--tm)}
+.ai-sel{padding:9px 12px;border-radius:8px;font-size:12px;background:var(--bg);border:1px solid var(--bd);color:var(--tp);outline:none;font-family:var(--fd);transition:all .2s;width:100%;cursor:pointer}
+.ai-sel:focus{border-color:var(--tlm)}
+.ai-sel option{background:#0a1628}
+.ai-marks-hd{font-size:10px;font-weight:600;color:var(--ts);letter-spacing:.08em;margin-bottom:10px;font-family:var(--fm);text-transform:uppercase}
+.ai-marks-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ai-mark-row{display:flex;align-items:center;gap:8px}
+.ai-mark-name{font-size:10px;color:var(--ts);min-width:70px;font-family:var(--fm)}
+.ai-mark-inp{flex:1;padding:7px 10px;border-radius:7px;font-size:12px;background:var(--bg);border:1px solid var(--bd);color:var(--tp);outline:none;font-family:var(--fm);transition:all .2s;width:100%}
+.ai-mark-inp:focus{border-color:var(--tlm);box-shadow:0 0 0 2px var(--tld)}
+.ai-mark-inp.strong{border-color:rgba(38,217,139,.5);color:var(--gn)}
+.ai-mark-inp.weak{border-color:rgba(255,71,87,.5);color:var(--rd)}
+.ai-mark-inp.mid{border-color:rgba(245,166,35,.4);color:var(--am)}
+
+/* Bars preview */
+.ai-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.ai-bar-subj{font-size:10px;color:var(--ts);width:80px;font-family:var(--fm);flex-shrink:0}
+.ai-bar-track{flex:1;height:5px;border-radius:3px;background:var(--bd);overflow:hidden}
+.ai-bar-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.17,.67,.35,1.2)}
+.ai-bar-score{font-size:10px;font-family:var(--fm);width:28px;text-align:right}
+
+/* Buttons */
+.btn-rand{padding:6px 14px;border-radius:7px;font-size:11px;font-weight:600;background:var(--bgc2);border:1px solid var(--bdg);color:var(--ts);cursor:pointer;font-family:var(--fd);transition:all .2s}
+.btn-rand:hover{border-color:var(--tlm);color:var(--tl)}
+.btn-analyse{margin-top:16px;padding:13px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:700;font-family:var(--fd);background:linear-gradient(135deg,var(--tl),#009688);color:#fff;transition:all .2s;box-shadow:0 0 20px var(--tlm);letter-spacing:.03em;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn-analyse:hover{transform:translateY(-1px);box-shadow:0 0 32px var(--tlm)}
+.btn-analyse:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-a-ico{font-size:16px}
+.btn-regen{width:100%;margin-top:14px;padding:10px;border-radius:8px;border:1px solid var(--bdg);background:var(--bgc2);color:var(--ts);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fd);transition:all .2s}
+.btn-regen:hover{border-color:var(--tlm);color:var(--tl)}
+
+/* Empty / Loading states */
+.ai-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;text-align:center;flex:1}
+.ai-empty-ico{font-size:48px;margin-bottom:12px;opacity:.4}
+.ai-empty-t{font-size:15px;font-weight:700;color:var(--ts);margin-bottom:8px}
+.ai-empty-s{font-size:12px;color:var(--tm);line-height:1.6;max-width:260px}
+.ai-empty-s strong{color:var(--ts)}
+.ai-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;text-align:center;flex:1}
+.ai-spin-ring{width:48px;height:48px;border-radius:50%;border:3px solid var(--bd);border-top-color:var(--tl);animation:spinRing .8s linear infinite;margin-bottom:16px}
+.ai-loading-t{font-size:14px;font-weight:700;color:var(--ts);margin-bottom:4px}
+.ai-loading-s{font-size:11px;color:var(--tm);font-family:var(--fm)}
+
+/* Score banner */
+.ai-score-banner{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;padding:16px;border-radius:12px;margin-bottom:16px;background:linear-gradient(135deg,#091a2e,#0c2240);border:1px solid var(--bdg)}
+.ai-score-ring{position:relative;flex-shrink:0}
+.ai-trk{fill:none;stroke:#1a2d47;stroke-width:7}
+.ai-arc{fill:none;stroke:var(--tl);stroke-width:7;stroke-linecap:round;stroke-dasharray:201;stroke-dashoffset:201;transform-origin:center;transform:rotate(-90deg);transition:stroke-dashoffset 1.4s cubic-bezier(.17,.67,.35,1.2),stroke .4s}
+.ai-score-ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#ai-score-num{font-size:18px;font-weight:800;font-family:var(--fm);color:var(--tl);line-height:1}
+.ai-score-sub{font-size:8px;color:var(--tm);font-family:var(--fm)}
+.ai-score-lbl{font-size:8px;color:var(--tm);font-family:var(--fm);letter-spacing:.13em;text-transform:uppercase;margin-bottom:3px}
+.ai-score-verdict{font-size:16px;font-weight:800;margin-bottom:4px}
+.ai-score-desc{font-size:11px;color:var(--ts);line-height:1.5}
+
+/* Output sections */
+.ai-section{margin-bottom:14px}
+.ai-sec-hd{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ts);font-family:var(--fm);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ai-sec-ico{font-size:13px}
+.ai-sec-body{font-size:12px;color:var(--tp);line-height:1.7;padding:12px;border-radius:8px;background:rgba(0,201,177,.04);border:1px solid rgba(0,201,177,.1)}
+.ai-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:600px){.ai-two-col{grid-template-columns:1fr}}
+.ai-mini-card{border-radius:10px;padding:12px}
+.ai-mini-card.ai-green{background:var(--gnd);border:1px solid rgba(38,217,139,.2)}
+.ai-mini-card.ai-amber{background:var(--amd);border:1px solid rgba(245,166,35,.2)}
+.ai-mini-hd{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:var(--fm);margin-bottom:8px}
+.ai-mini-card.ai-green .ai-mini-hd{color:var(--gn)}
+.ai-mini-card.ai-amber .ai-mini-hd{color:var(--am)}
+.ai-strength-item,.ai-improve-item{font-size:11px;line-height:1.6;margin-bottom:6px;padding:6px 8px;border-radius:6px;background:rgba(0,0,0,.2);color:var(--tp)}
+.ai-rec-item{font-size:12px;line-height:1.65;padding:10px 12px;border-radius:8px;background:var(--bgc2);border:1px solid var(--bd);margin-bottom:8px;color:var(--tp);border-left:3px solid var(--tl)}
+.ai-rec-num{font-size:9px;font-family:var(--fm);color:var(--tl);font-weight:700;margin-bottom:4px;letter-spacing:.08em}
+.ai-out-badge{font-size:10px;font-family:var(--fm);padding:3px 10px;border-radius:6px;background:var(--tld);color:var(--tl);border:1px solid var(--tlm)}
+
+/* ── SCORE BANNER (Resource Dashboard) ── */
+.score-banner{display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;padding:20px 24px;border-radius:14px;margin-bottom:20px;background:linear-gradient(135deg,#0a1e35,#0d2240 50%,#091828);border:1px solid var(--bdg);position:relative;overflow:hidden}
+.score-banner::before{content:'';position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,var(--tld),transparent 70%);pointer-events:none}
+.s-ring{position:relative;width:80px;height:80px}
+.s-ring svg{width:80px;height:80px;transform:rotate(-90deg)}
+.s-ring .trk{fill:none;stroke:#1a2d47;stroke-width:7}
+.s-ring .fil{fill:none;stroke:var(--tl);stroke-width:7;stroke-linecap:round;stroke-dasharray:220;transition:stroke-dashoffset 1.5s cubic-bezier(.17,.67,.35,1.2)}
+.s-ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.s-num{font-size:18px;font-weight:800;color:var(--tl);line-height:1;font-family:var(--fm)}
+.s-den{font-size:8px;color:var(--tm);font-family:var(--fm)}
+.s-lbl{font-size:10px;color:var(--tm);font-family:var(--fm);letter-spacing:.1em;margin-bottom:4px}
+.s-vrd{font-size:20px;font-weight:800;margin-bottom:4px}
+.s-dsc{font-size:12px;color:var(--ts);line-height:1.5;max-width:440px}
+.s-meta{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.m-val{font-size:16px;font-weight:700;font-family:var(--fm)}
+.m-lbl{font-size:9px;color:var(--tm);letter-spacing:.1em;text-transform:uppercase}
+
+/* ── SLIDERS ── */
+.sl-r{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sl-l{font-size:9px;color:var(--tm);font-family:var(--fm);width:80px}
+input[type=range]{flex:1;height:4px;border-radius:2px;cursor:pointer;accent-color:var(--tl);background:var(--bd)}
+.sl-v{font-size:10px;font-family:var(--fm);color:var(--tl);width:36px;text-align:right}
+.btn-full{width:100%;margin-top:12px;padding:11px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:.05em;font-family:var(--fd);background:linear-gradient(135deg,var(--tl),#009688);color:#fff;transition:all .2s}
+.btn-full:hover{transform:translateY(-1px)}
+
+/* ── CONFLICTS ── */
+.cfl{display:flex;flex-direction:column;gap:8px}
+.cfi{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bgc2);border:1px solid var(--bd)}
+.cfi.cr{border-left:3px solid var(--rd)}.cfi.wn{border-left:3px solid var(--am)}.cfi.in{border-left:3px solid var(--bl)}
+.cfi-ico{font-size:14px;flex-shrink:0}
+.cfi-t{font-size:12px;font-weight:600;color:var(--tp);margin-bottom:2px}
+.cfi-d{font-size:11px;color:var(--ts);line-height:1.4}
+.cfi-m{margin-left:auto;font-size:9px;font-family:var(--fm);color:var(--tm);white-space:nowrap;padding-left:8px}
+
+/* ── SETTINGS ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.ss{background:var(--bgc);border:1px solid var(--bd);border-radius:12px;padding:20px}
+.ss h3{font-size:12px;font-weight:600;color:var(--tp);margin-bottom:14px;letter-spacing:.05em}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #0f1e30}
+.sr:last-child{border-bottom:none}
+.sr-n{font-size:12px;color:var(--ts)}
+.sr-d{font-size:10px;color:var(--tm);margin-top:2px;font-family:var(--fm)}
+.tog{position:relative;width:36px;height:20px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tog-s{position:absolute;inset:0;background:#1a2d47;border-radius:10px;cursor:pointer;transition:.3s}
+.tog-s::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#3d5878;border-radius:50%;transition:.3s}
+.tog input:checked+.tog-s{background:var(--tld);border:1px solid var(--tlm)}
+.tog input:checked+.tog-s::before{transform:translateX(16px);background:var(--tl)}
+
+/* ── PROFILE SETTINGS FORM ── */
+.profile-form{background:var(--bgc);border:1px solid var(--bdg);border-radius:16px;padding:24px;margin-bottom:20px;animation:fadeUp .4s ease both}
+.profile-form-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--bd)}
+.profile-avatar-big{width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,#1a3a5c,#0d2040);border:2px solid var(--bdg);display:flex;align-items:center;justify-content:center;font-size:28px;position:relative;overflow:hidden;cursor:pointer;flex-shrink:0}
+.profile-avatar-big img{width:100%;height:100%;object-fit:cover}
+.profile-avatar-big:hover::after{content:'📷';position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;font-size:22px}
+.profile-avatar-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;font-size:22px}
+.profile-avatar-big:hover .profile-avatar-overlay{display:flex}
+.pf-hinfo h2{font-size:18px;font-weight:700;color:var(--tp);margin-bottom:4px}
+.pf-hinfo p{font-size:11px;color:var(--ts);font-family:var(--fm)}
+.pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pf-grid.three{grid-template-columns:1fr 1fr 1fr}
+.pf-fgrp{display:flex;flex-direction:column;gap:5px}
+.pf-fgrp.full{grid-column:1/-1}
+.pf-lbl{font-size:9px;letter-spacing:.12em;color:var(--tm);font-family:var(--fm);text-transform:uppercase}
+.pf-inp{padding:10px 14px;border-radius:9px;font-size:13px;background:var(--bg);border:1px solid var(--bd);color:var(--tp);outline:none;font-family:var(--fd);transition:all .2s;width:100%}
+.pf-inp:focus{border-color:var(--tlm);box-shadow:0 0 0 3px var(--tld)}
+.pf-inp::placeholder{color:var(--tm)}
+.pf-sel{padding:10px 14px;border-radius:9px;font-size:13px;background:var(--bg);border:1px solid var(--bd);color:var(--tp);outline:none;font-family:var(--fd);transition:all .2s;width:100%;cursor:pointer}
+.pf-sel:focus{border-color:var(--tlm)}
+.pf-sel option{background:#0a1628}
+.pf-textarea{padding:10px 14px;border-radius:9px;font-size:13px;background:var(--bg);border:1px solid var(--bd);color:var(--tp);outline:none;font-family:var(--fd);transition:all .2s;width:100%;resize:vertical;min-height:80px}
+.pf-textarea:focus{border-color:var(--tlm);box-shadow:0 0 0 3px var(--tld)}
+.pf-section-title{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--tl);font-family:var(--fm);margin:18px 0 10px;grid-column:1/-1}
+.pf-save-row{display:flex;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.pf-save-btn{padding:10px 24px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:var(--fd);background:linear-gradient(135deg,var(--tl),#009688);color:#fff;transition:all .2s;box-shadow:0 0 16px var(--tlm)}
+.pf-save-btn:hover{transform:translateY(-1px)}
+.pf-cancel-btn{padding:10px 20px;border-radius:9px;border:1px solid var(--bd);cursor:pointer;font-size:13px;font-weight:600;font-family:var(--fd);background:transparent;color:var(--ts);transition:all .2s}
+.pf-cancel-btn:hover{border-color:var(--tlm);color:var(--tl)}
+.pf-saved-msg{font-size:11px;color:var(--gn);font-family:var(--fm);display:none;animation:fadeUp .3s ease both}
+.pf-saved-msg.show{display:block}
+
+/* ── TIMELINE ── */
+.tl-list{display:flex;flex-direction:column;gap:12px}
+.tl-item{display:flex;gap:14px;align-items:flex-start}
+.tl-ico{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.tl-ico.tl{background:var(--tld)}.tl-ico.am{background:var(--amd)}.tl-ico.gn{background:var(--gnd)}.tl-ico.bl{background:var(--bld)}.tl-ico.pu{background:var(--pud)}.tl-ico.pk{background:var(--pkd)}
+.tl-title{font-size:12px;font-weight:600;color:var(--tp);margin-bottom:3px}
+.tl-desc{font-size:11px;color:var(--ts);line-height:1.5;margin-bottom:3px}
+.tl-date{font-size:10px;color:var(--tm);font-family:var(--fm)}
+
+/* ── TABLE ── */
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt th{padding:10px 14px;text-align:left;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tm);font-family:var(--fm);border-bottom:1px solid var(--bd);font-weight:500}
+.dt td{padding:11px 14px;border-bottom:1px solid #0f1e30;color:var(--ts);vertical-align:middle}
+.dt tr:hover td{background:var(--bgc2);color:var(--tp)}
+.dt tr:last-child td{border-bottom:none}
+
+/* ── TIMETABLE ── */
+.tt{display:grid;grid-template-columns:70px repeat(6,1fr);gap:3px;font-size:10px}
+.tth{background:var(--bgc2);padding:6px;border-radius:5px;text-align:center;font-family:var(--fm);font-size:9px;color:var(--tm);letter-spacing:.08em}
+.ttt{background:var(--bgc2);padding:6px;border-radius:5px;font-family:var(--fm);font-size:9px;color:var(--tm);display:flex;align-items:center;justify-content:flex-end;padding-right:8px}
+.ttc{padding:6px 4px;border-radius:5px;text-align:center;font-size:9px;line-height:1.3;font-weight:500;cursor:pointer;transition:transform .15s}
+.ttc:hover{transform:scale(1.05)}
+.ttc.ma{background:#1a3a5c;color:var(--bl);border:1px solid #1e4a70}
+.ttc.sc{background:#0d2e24;color:var(--gn);border:1px solid #1a4a38}
+.ttc.en{background:#2a1f3a;color:var(--pu);border:1px solid #3d2c55}
+.ttc.hi{background:#2e1a1a;color:#ff8a80;border:1px solid #4a2a2a}
+.ttc.ss{background:#2a2010;color:var(--am);border:1px solid #403018}
+.ttc.lb{background:#0f2a20;color:#00ffcc;border:1px solid #1a4a35;font-style:italic}
+.ttc.pt{background:#1a2030;color:#80cbc4;border:1px solid #28384a}
+.ttc.fr{background:#0d1520;color:#2a4060;border:1px solid #131e2c}
+.ttc.br{background:#0a1018;color:#1e3040;border:1px solid #0d1520;font-style:italic}
+
+/* ── ATTENDANCE HEATMAP ── */
+.hm{display:grid;grid-template-columns:36px repeat(12,1fr);gap:3px;overflow-x:auto}
+.hm-month{font-size:8px;color:var(--tm);font-family:var(--fm);text-align:center;padding:2px 0;letter-spacing:.06em}
+.hm-day-lbl{font-size:8px;color:var(--tm);font-family:var(--fm);display:flex;align-items:center;justify-content:flex-end;padding-right:4px}
+.hm-cell{height:16px;border-radius:3px;background:var(--bd);cursor:pointer;transition:opacity .2s}
+.hm-cell:hover{opacity:.8}
+
+/* ── AI RECOMMENDATIONS ── */
+.rc-card{padding:14px 16px;border-radius:10px;background:var(--bgc2);border:1px solid var(--bd);cursor:pointer;transition:all .2s;margin-bottom:10px}
+.rc-card:hover{border-color:var(--tlm);transform:translateX(3px)}
+.rc-hd{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.rct{font-size:8px;padding:2px 8px;border-radius:4px;font-family:var(--fm);letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.rct.timetable{background:var(--bld);color:var(--bl);border:1px solid #4fc3f730}
+.rct.workload{background:var(--rdd);color:var(--rd);border:1px solid #ff475730}
+.rct.labs{background:var(--gnd);color:var(--gn);border:1px solid #26d98b30}
+.rct.infra{background:var(--amd);color:var(--am);border:1px solid #f5a62330}
+.rcp{margin-left:auto;font-size:9px;font-family:var(--fm)}
+.rcp.h{color:var(--rd)}.rcp.m{color:var(--am)}.rcp.l{color:var(--gn)}
+.rc-t{font-size:13px;font-weight:600;color:var(--tp);margin-bottom:4px}
+.rc-b{font-size:11px;color:var(--ts);line-height:1.5}
+
+/* ── HAMBURGER (mobile) ── */
+.hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;width:38px;height:38px;border-radius:9px;background:var(--bgc);border:1px solid var(--bd);cursor:pointer;align-items:center;justify-content:center;font-size:18px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:none}
+  .main{margin-left:0}
+  .hamburger{display:flex}
+  .qstats{grid-template-columns:repeat(3,1fr)}
+  .hero{grid-template-columns:1fr;gap:16px}
+  .score-cluster{align-items:flex-start;flex-direction:row;flex-wrap:wrap}
+  .settings-grid{grid-template-columns:1fr}
+  .cg3,.cg4{grid-template-columns:1fr 1fr}
+  .pf-grid{grid-template-columns:1fr}
+  .pf-grid.three{grid-template-columns:1fr 1fr}
+  .auth-row{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .qstats{grid-template-columns:1fr 1fr}
+  .hero{padding:16px}
+  .cg3,.cg4{grid-template-columns:1fr}
+  .score-banner{grid-template-columns:1fr}
+  .pf-grid.three{grid-template-columns:1fr}
+}
+
+/* ── OVERLAY (mobile sidebar bg) ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:45}
+.sidebar-overlay.show{display:block}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <div class="auth-mark">🏫</div>
+      <div>
+        <div class="auth-brand">Smart<span>School</span> AI</div>
+        <div style="font-size:10px;color:var(--tm);font-family:var(--fm);letter-spacing:.1em">STUDENT PORTAL · KV DWARKA SEC-8</div>
+      </div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</div>
+        <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="login-form">
+        <div class="auth-title">Welcome Back 👋</div>
+        <div class="auth-sub">Sign in to your student account</div>
+        <div class="auth-form">
+          <div class="auth-fgrp">
+            <label class="auth-lbl">Admission Number / Email</label>
+            <input class="auth-inp" id="l-user" placeholder="e.g. 24KV08001 or student@email.com" type="text"/>
+          </div>
+          <div class="auth-fgrp">
+            <label class="auth-lbl">Password</label>
+            <input class="auth-inp" id="l-pass" placeholder="Enter your password" type="password"/>
+          </div>
+          <div id="l-err" class="auth-err">Invalid credentials. Please try again.</div>
+          <button class="auth-btn" onclick="doLogin()">Sign In →</button>
+          <div style="text-align:center;font-size:11px;color:var(--tm);font-family:var(--fm)">
+            Demo: Use any email + password (6+ chars)
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="register-form" style="display:none">
+        <div class="auth-title">Create Account 🎓</div>
+        <div class="auth-sub">Fill in your details to register</div>
+        <div class="auth-form">
+          <div class="auth-row">
+            <div class="auth-fgrp">
+              <label class="auth-lbl">First Name</label>
+              <input class="auth-inp" id="r-fn" placeholder="First name" type="text"/>
+            </div>
+            <div class="auth-fgrp">
+              <label class="auth-lbl">Last Name</label>
+              <input class="auth-inp" id="r-ln" placeholder="Last name" type="text"/>
+            </div>
+          </div>
+          <div class="auth-row">
+            <div class="auth-fgrp">
+              <label class="auth-lbl">Admission No.</label>
+              <input class="auth-inp" id="r-adm" placeholder="24KV08001" type="text"/>
+            </div>
+            <div class="auth-fgrp">
+              <label class="auth-lbl">Class & Section</label>
+              <select class="auth-sel" id="r-cls">
+                <option value="">Select...</option>
+                <option>Class 6-A</option><option>Class 6-B</option>
+                <option>Class 7-A</option><option>Class 7-B</option>
+                <option>Class 8-A</option><option>Class 8-B</option>
+                <option>Class 9-A</option><option>Class 9-B</option>
+                <option>Class 10-A</option><option>Class 10-B</option>
+                <option>Class 11 (Sci)</option><option>Class 11 (Com)</option>
+                <option>Class 12 (Sci)</option><option>Class 12 (Com)</option>
+              </select>
+            </div>
+          </div>
+          <div class="auth-fgrp auth-fgrp full">
+            <label class="auth-lbl">Email Address</label>
+            <input class="auth-inp" id="r-email" placeholder="student@email.com" type="email"/>
+          </div>
+          <div class="auth-row">
+            <div class="auth-fgrp">
+              <label class="auth-lbl">Date of Birth</label>
+              <input class="auth-inp" id="r-dob" type="date"/>
+            </div>
+            <div class="auth-fgrp">
+              <label class="auth-lbl">Gender</label>
+              <select class="auth-sel" id="r-gen">
+                <option value="">Select...</option>
+                <option>Male</option><option>Female</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="auth-row">
+            <div class="auth-fgrp">
+              <label class="auth-lbl">Password</label>
+              <input class="auth-inp" id="r-pass" placeholder="Min 6 characters" type="password"/>
+            </div>
+            <div class="auth-fgrp">
+              <label class="auth-lbl">Confirm Password</label>
+              <input class="auth-inp" id="r-pass2" placeholder="Repeat password" type="password"/>
+            </div>
+          </div>
+          <div id="r-err" class="auth-err">Please check all fields.</div>
+          <div id="r-ok" class="auth-ok">✓ Registration successful! You are now logged in.</div>
+          <button class="auth-btn" onclick="doRegister()">Create Account →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════ -->
+<div id="app">
+
+<!-- Hamburger -->
+<div class="hamburger" onclick="toggleSidebar()" id="hamburger">☰</div>
+<div class="sidebar-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-mark">🏫</div>
+    <div><div class="sb-name">SmartSchool AI</div><div class="sb-sub">Student Portal</div></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">My Dashboard</div>
+    <div class="ni active" onclick="nav('profile',this)"><span class="ico">🎓</span>My Profile</div>
+    <div class="ni" onclick="nav('academics',this)"><span class="ico">📊</span>Academics</div>
+    <div class="ni" onclick="nav('schedule',this)"><span class="ico">📅</span>Timetable</div>
+    <div class="ni" onclick="nav('attendance',this)"><span class="ico">✅</span>Attendance</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">School Dashboard</div>
+    <div class="ni" onclick="nav('resource',this)"><span class="ico">📈</span>Resource Overview</div>
+    <div class="ni" onclick="nav('recommend',this)"><span class="ico">🤖</span>AI Recommendations<span class="bdg">4</span></div>
+    <div class="ni" onclick="nav('conflicts',this)"><span class="ico">⚠️</span>Conflicts<span class="bdg">2</span></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">System</div>
+    <div class="ni" onclick="nav('settings',this)"><span class="ico">⚙️</span>Settings</div>
+  </div>
+  <div class="sb-bot">
+    <div class="stu-chip" onclick="nav('settings',document.querySelector('.ni[onclick*=settings]'))">
+      <div class="stu-av" id="sb-avatar">🎓</div>
+      <div><div class="stu-nm" id="sb-name">Student</div><div class="stu-tp" id="sb-class">KV Dwarka · CBSE</div></div>
+    </div>
+    <div class="sb-logout" onclick="doLogout()">⏻ &nbsp; Sign Out</div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+  <header class="topbar">
+    <div>
+      <div class="pg-title" id="top-t">My Profile</div>
+      <div class="pg-bc" id="top-b">SmartSchool AI / Profile</div>
+    </div>
+    <div class="tb-r">
+      <div class="s-pill">LIVE</div>
+      <div class="t-badge">Term II · 2024–25</div>
+      <button class="btn-a" onclick="nav('resource',document.querySelector('.ni[onclick*=resource]'))">📊 Dashboard</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+  <!-- ══════════════════════════════════════
+       TAB: MY PROFILE
+  ══════════════════════════════════════ -->
+  <div class="tv on" id="tv-profile">
+
+    <!-- Hero Banner -->
+    <div class="hero" id="profile-hero">
+      <div class="avatar-wrap">
+        <div class="avatar" id="hero-avatar">🎓</div>
+        <div class="avatar-ring"></div>
+        <div class="status-dot"></div>
+      </div>
+      <div class="student-info">
+        <div class="stu-top">
+          <div class="stu-name" id="hero-name">Student Name</div>
+          <div class="stu-badge" id="hero-class">Class --</div>
+          <div class="stu-rank-badge" id="hero-rank">Rank --</div>
+        </div>
+        <div class="stu-meta">
+          <div class="stu-meta-item"><span class="lbl">ADM</span><span id="hero-adm">--</span></div>
+          <div class="stu-meta-item"><span class="lbl">ROLL</span><span id="hero-roll">--</span></div>
+          <div class="stu-meta-item"><span class="lbl">HOUSE</span><span id="hero-house">--</span></div>
+          <div class="stu-meta-item"><span class="lbl">DOB</span><span id="hero-dob">--</span></div>
+          <div class="stu-meta-item"><span class="lbl">CONTACT</span><span id="hero-phone">--</span></div>
+        </div>
+        <div class="stu-tags" id="hero-tags">
+          <div class="tag topper">🏆 Topper</div>
+          <div class="tag science">🔬 Science</div>
+          <div class="tag math">📐 Maths</div>
+        </div>
+      </div>
+      <div class="score-cluster">
+        <div class="score-big"><div class="val" id="hero-avg">87.4%</div><div class="sub">Overall Avg</div></div>
+        <div class="score-mini-row">
+          <div class="score-mini"><div class="v" style="color:var(--gn)" id="hero-att">94%</div><div class="l">Attend</div></div>
+          <div class="score-mini"><div class="v" style="color:var(--am)" id="hero-rank-val">#3</div><div class="l">Rank</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="qstats">
+      <div class="qs tl"><div class="qs-ico">📚</div><div class="qs-val tl" id="qs-avg">87.4</div><div class="qs-lbl">Overall %</div><div class="qs-trend up" id="qs-trend-avg">↑ +2.1 this term</div></div>
+      <div class="qs am"><div class="qs-ico">✅</div><div class="qs-val am" id="qs-att">94%</div><div class="qs-lbl">Attendance</div><div class="qs-trend eq" id="qs-trend-att">→ 13 absent</div></div>
+      <div class="qs gn"><div class="qs-ico">🏆</div><div class="qs-val gn" id="qs-rank">#3</div><div class="qs-lbl">Class Rank</div><div class="qs-trend up" id="qs-trend-rank">↑ +2 positions</div></div>
+      <div class="qs bl"><div class="qs-ico">📝</div><div class="qs-val bl" id="qs-subj">6</div><div class="qs-lbl">Subjects</div><div class="qs-trend eq">→ CBSE Board</div></div>
+      <div class="qs pu"><div class="qs-ico">🎖️</div><div class="qs-val pu" id="qs-awards">12</div><div class="qs-lbl">Awards</div><div class="qs-trend up" id="qs-trend-awards">↑ +3 this year</div></div>
+    </div>
+
+    <!-- Charts row -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="pnl">
+        <div class="pnl-hd"><div class="pnl-t"><span class="dot tl"></span>Performance Trend</div><span style="font-size:9px;color:var(--tm);font-family:var(--fm)">Apr 2024 – Feb 2025</span></div>
+        <div class="ch-w lg"><canvas id="perfChart"></canvas></div>
+      </div>
+      <div class="pnl">
+        <div class="pnl-hd"><div class="pnl-t"><span class="dot pu"></span>Skills Radar</div></div>
+        <div class="ch-w lg"><canvas id="radarChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Subject bars + Timeline -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="pnl">
+        <div class="pnl-hd"><div class="pnl-t"><span class="dot am"></span>Subject Performance</div></div>
+        <div class="subj-list" id="profile-subj-list">
+          <!-- Populated dynamically from profile marks -->
+        </div>
+      </div>
+      <div class="pnl">
+        <div class="pnl-hd"><div class="pnl-t"><span class="dot pk"></span>Recent Activity</div></div>
+        <div class="tl-list">
+          <div class="tl-item"><div class="tl-ico tl">📊</div><div class="tl-body"><div class="tl-title">Term II Exams Scheduled</div><div class="tl-desc">Board practical examinations begin Feb 28.</div><div class="tl-date">Feb 20, 2025</div></div></div>
+          <div class="tl-item"><div class="tl-ico am">🏆</div><div class="tl-body"><div class="tl-title">Science Olympiad — Gold Medal</div><div class="tl-desc">Ranked 1st in district-level CBSE Science Olympiad.</div><div class="tl-date">Jan 15, 2025</div></div></div>
+          <div class="tl-item"><div class="tl-ico pk">⭐</div><div class="tl-body"><div class="tl-title">Star Student of the Month</div><div class="tl-desc">Recognized for academic excellence by Principal.</div><div class="tl-date">Dec 10, 2024</div></div></div>
+          <div class="tl-item"><div class="tl-ico pu">🏕️</div><div class="tl-body"><div class="tl-title">NCC Annual Training Camp</div><div class="tl-desc">Rated 'Outstanding' in discipline and leadership.</div><div class="tl-date">Oct 14, 2024</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tv-profile -->
+
+  <!-- ══════════════════════════════════════
+       TAB: ACADEMICS
+  ══════════════════════════════════════ -->
+  <div class="tv" id="tv-academics">
+    <div class="sec-hd"><div class="sec-t">Academic Performance</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="pnl"><div class="pnl-t"><span class="dot tl"></span>Score History</div><div class="ch-w"><canvas id="acadChart"></canvas></div></div>
+      <div class="pnl"><div class="pnl-t"><span class="dot am"></span>Grade Distribution</div><div class="ch-w"><canvas id="gradeChart"></canvas></div></div>
+    </div>
+    <div class="pnl" style="margin-bottom:20px">
+      <div class="pnl-t" style="margin-bottom:16px"><span class="dot bl"></span>Detailed Subject Results</div>
+      <table class="dt">
+        <thead><tr><th>Subject</th><th>FA1</th><th>FA2</th><th>SA1</th><th>FA3</th><th>FA4</th><th>SA2*</th><th>Overall</th><th>Grade</th></tr></thead>
+        <tbody id="acad-tbody">
+          <tr><td>Mathematics</td><td>24</td><td>23</td><td>76</td><td>24</td><td>23</td><td>–</td><td style="color:var(--tl);font-family:var(--fm)">94%</td><td><span class="stag ok">A1</span></td></tr>
+          <tr><td>Science</td><td>22</td><td>21</td><td>70</td><td>23</td><td>22</td><td>–</td><td style="color:var(--gn);font-family:var(--fm)">87%</td><td><span class="stag ok">A1</span></td></tr>
+          <tr><td>English</td><td>19</td><td>18</td><td>61</td><td>20</td><td>18</td><td>–</td><td style="color:var(--bl);font-family:var(--fm)">76%</td><td><span class="stag wn">B1</span></td></tr>
+          <tr><td>Hindi</td><td>21</td><td>20</td><td>66</td><td>21</td><td>20</td><td>–</td><td style="color:var(--am);font-family:var(--fm)">82%</td><td><span class="stag ok">A2</span></td></tr>
+          <tr><td>Social Science</td><td>20</td><td>19</td><td>63</td><td>20</td><td>19</td><td>–</td><td style="color:var(--pu);font-family:var(--fm)">79%</td><td><span class="stag wn">B1</span></td></tr>
+          <tr><td>Computer Science</td><td>23</td><td>22</td><td>73</td><td>23</td><td>23</td><td>–</td><td style="color:var(--tl);font-family:var(--fm)">91%</td><td><span class="stag ok">A1</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       TAB: TIMETABLE
+  ══════════════════════════════════════ -->
+  <div class="tv" id="tv-schedule">
+    <div class="sec-hd"><div class="sec-t">Class Timetable</div><span style="font-size:10px;color:var(--tm);font-family:var(--fm)" id="tt-class-label">Class --</span></div>
+    <div class="pnl" style="margin-bottom:20px;overflow-x:auto">
+      <div class="pnl-t" style="margin-bottom:16px"><span class="dot tl"></span>Weekly Schedule</div>
+      <div class="tt">
+        <div class="tth"></div>
+        <div class="tth">MON</div><div class="tth">TUE</div><div class="tth">WED</div><div class="tth">THU</div><div class="tth">FRI</div><div class="tth">SAT</div>
+        <div class="ttt">8:00</div><div class="ttc ma">Maths</div><div class="ttc sc">Science</div><div class="ttc en">English</div><div class="ttc ma">Maths</div><div class="ttc hi">Hindi</div><div class="ttc ss">Soc Sci</div>
+        <div class="ttt">9:00</div><div class="ttc sc">Science</div><div class="ttc ma">Maths</div><div class="ttc hi">Hindi</div><div class="ttc sc">Science</div><div class="ttc en">English</div><div class="ttc ma">Maths</div>
+        <div class="ttt">10:00</div><div class="ttc en">English</div><div class="ttc hi">Hindi</div><div class="ttc ma">Maths</div><div class="ttc en">English</div><div class="ttc sc">Science</div><div class="ttc hi">Hindi</div>
+        <div class="ttt">11:00</div><div class="ttc br">Break</div><div class="ttc br">Break</div><div class="ttc br">Break</div><div class="ttc br">Break</div><div class="ttc br">Break</div><div class="ttc br">Break</div>
+        <div class="ttt">11:30</div><div class="ttc hi">Hindi</div><div class="ttc ss">Soc Sci</div><div class="ttc sc">Science</div><div class="ttc hi">Hindi</div><div class="ttc ma">Maths</div><div class="ttc pt">PT</div>
+        <div class="ttt">12:30</div><div class="ttc ss">Soc Sci</div><div class="ttc en">English</div><div class="ttc ss">Soc Sci</div><div class="ttc lb">Science Lab</div><div class="ttc ss">Soc Sci</div><div class="ttc fr">Free</div>
+        <div class="ttt">1:30</div><div class="ttc lb">Comp Lab</div><div class="ttc lb">Comp Lab</div><div class="ttc en">English</div><div class="ttc sc">Science</div><div class="ttc lb">Art</div><div class="ttc fr">Free</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       TAB: ATTENDANCE
+  ══════════════════════════════════════ -->
+  <div class="tv" id="tv-attendance">
+    <div class="sec-hd"><div class="sec-t">Attendance Overview</div></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+      <div class="mc tl"><div class="mc-hd"><div class="mc-lbl">Total Days</div><div class="mc-ico tl">📅</div></div><div class="mc-v tl">218</div><div class="mc-sub">Academic year 2024–25</div><div class="pb"><div class="pf tl" style="width:100%"></div></div><div class="mc-ft"><span class="mc-pct">Apr – Feb</span></div></div>
+      <div class="mc gn"><div class="mc-hd"><div class="mc-lbl">Present</div><div class="mc-ico gn">✅</div></div><div class="mc-v gn" id="att-present">205</div><div class="mc-sub">Days attended</div><div class="pb"><div class="pf gn" id="att-pct-bar" style="width:94%"></div></div><div class="mc-ft"><span class="stag ok" id="att-pct-tag">94%</span></div></div>
+      <div class="mc rd"><div class="mc-hd"><div class="mc-lbl">Absent</div><div class="mc-ico rd">❌</div></div><div class="mc-v rd" id="att-absent">13</div><div class="mc-sub">Days absent</div><div class="pb"><div class="pf rd" id="att-abs-pct-bar" style="width:6%"></div></div><div class="mc-ft"><span class="stag ok" id="att-status-tag">WITHIN LIMIT</span></div></div>
+      <div class="mc am"><div class="mc-hd"><div class="mc-lbl">Leaves</div><div class="mc-ico am">📋</div></div><div class="mc-v am">5</div><div class="mc-sub">Medical leaves</div><div class="pb"><div class="pf am" style="width:38%"></div></div><div class="mc-ft"><span class="stag ok">APPROVED</span></div></div>
+    </div>
+    <div class="pnl">
+      <div class="pnl-t" style="margin-bottom:16px"><span class="dot tl"></span>Annual Attendance Heatmap</div>
+      <div class="hm" id="heatmap"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       TAB: RESOURCE DASHBOARD
+  ══════════════════════════════════════ -->
+  <div class="tv" id="tv-resource">
+    <div class="sec-hd"><div class="sec-t">School Resource Overview</div></div>
+    <div class="score-banner">
+      <div class="s-ring"><svg viewBox="0 0 80 80"><circle class="trk" cx="40" cy="40" r="34"/><circle class="fil" id="s-arc" cx="40" cy="40" r="34" stroke-dashoffset="120"/></svg><div class="s-ctr"><div class="s-num" id="s-n">48.5</div><div class="s-den">/100</div></div></div>
+      <div><div class="s-lbl">OVERALL EFFICIENCY SCORE</div><div class="s-vrd" id="s-v" style="color:var(--am)">Needs Attention</div><div class="s-dsc">KV Dwarka Sec-8 shows critical imbalance — teacher workload exceeds NCTE limits by 7.5% while labs sit idle at 40%.</div></div>
+      <div class="s-meta">
+        <div><div class="m-val" style="color:var(--bl)">860</div><div class="m-lbl">Students</div></div>
+        <div><div class="m-val" style="color:var(--tl)">24</div><div class="m-lbl">Sections</div></div>
+        <div><div class="m-val" style="color:var(--pu)">28</div><div class="m-lbl">Teachers</div></div>
+      </div>
+    </div>
+    <div class="cg cg3">
+      <div class="mc tl"><div class="mc-hd"><div class="mc-lbl">Classrooms</div><div class="mc-ico tl">🏛️</div></div><div class="mc-v tl" id="cr-p">55%</div><div class="mc-sub">18 rooms · 22 hrs/week avg</div><div class="pb"><div class="pf tl" id="cr-b" style="width:55%"></div></div><div class="mc-ft"><span class="stag ok">BALANCED</span><span class="mc-pct">Target: 75–85%</span></div></div>
+      <div class="mc am"><div class="mc-hd"><div class="mc-lbl">Laboratories</div><div class="mc-ico am">🔬</div></div><div class="mc-v am" id="lb-p">40%</div><div class="mc-sub">3 labs · 12 hrs/week avg</div><div class="pb"><div class="pf am" id="lb-b" style="width:40%"></div></div><div class="mc-ft"><span class="stag wn">UNDERUTILIZED</span><span class="mc-pct">Target: 60–80%</span></div></div>
+      <div class="mc rd"><div class="mc-hd"><div class="mc-lbl">Teacher Workload</div><div class="mc-ico rd">👩‍🏫</div></div><div class="mc-v rd" id="tw-p">107%</div><div class="mc-sub">28 teachers · 43 hrs/week avg</div><div class="pb"><div class="pf rd" id="tw-b" style="width:100%"></div></div><div class="mc-ft"><span class="stag cr">OVERLOADED</span><span class="mc-pct">Limit: 40 hrs</span></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="pnl"><div class="pnl-t"><span class="dot tl"></span>Resource Radar</div><div class="ch-w"><canvas id="rc"></canvas></div></div>
+      <div class="pnl"><div class="pnl-t"><span class="dot rd"></span>Active Conflicts</div>
+        <div class="cfl">
+          <div class="cfi cr"><div class="cfi-ico">🔴</div><div><div class="cfi-t">Teacher Overload</div><div class="cfi-d">3 teachers at 46+ periods.</div></div><div class="cfi-m">HIGH</div></div>
+          <div class="cfi wn"><div class="cfi-ico">🟡</div><div><div class="cfi-t">Idle Laboratories</div><div class="cfi-d">40% util — Rs.3.4L waste.</div></div><div class="cfi-m">MED</div></div>
+          <div class="cfi in"><div class="cfi-ico">🔵</div><div><div class="cfi-t">Schedule Fragmentation</div><div class="cfi-d">Single periods reduce time 12%.</div></div><div class="cfi-m">LOW</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="pnl"><div class="pnl-t"><span class="dot tl"></span>Weekly Hours Distribution</div><div class="ch-w"><canvas id="bc"></canvas></div></div>
+      <div class="pnl"><div class="pnl-t"><span class="dot am"></span>Configure &amp; Analyze</div>
+        <div style="font-size:9px;color:var(--tm);font-family:var(--fm);margin-bottom:10px">ADJUST UTILIZATION SLIDERS</div>
+        <div class="sl-r"><span class="sl-l">Classroom %</span><input type="range" id="sl-cr" min="0" max="120" value="55" oninput="upSlider('cr',this.value)"/><span class="sl-v" id="sv-cr">55%</span></div>
+        <div class="sl-r"><span class="sl-l">Lab %</span><input type="range" id="sl-lb" min="0" max="120" value="40" oninput="upSlider('lb',this.value)"/><span class="sl-v" id="sv-lb">40%</span></div>
+        <div class="sl-r"><span class="sl-l">Teacher %</span><input type="range" id="sl-tw" min="0" max="150" value="107" oninput="upSlider('tw',this.value)"/><span class="sl-v" id="sv-tw">107%</span></div>
+        <button class="btn-full" onclick="runAnalysis()">🤖 Recalculate Score</button>
+      </div>
+    </div>
+  </div><!-- /tv-resource -->
+
+  <!-- ══════════════════════════════════════
+       TAB: AI RECOMMENDATIONS
+  ══════════════════════════════════════ -->
+  <div class="tv" id="tv-recommend">
+    <div class="sec-hd"><div class="sec-t">AI Student Analyser</div></div>
+
+    <!-- ── AI ANALYSER PANEL ── -->
+    <div class="ai-analyser-wrap">
+
+      <!-- Student Data Input Card -->
+      <div class="pnl ai-input-card">
+        <div class="pnl-hd">
+          <div class="pnl-t"><span class="dot tl"></span>Student Data Input</div>
+          <button class="btn-rand" onclick="generateRandomStudent()">🎲 Random Student</button>
+        </div>
+
+        <div class="ai-form-grid">
+          <div class="ai-fgrp">
+            <label class="ai-lbl">Student Name</label>
+            <input class="ai-inp" id="ai-name" placeholder="e.g. Priya Sharma"/>
+          </div>
+          <div class="ai-fgrp">
+            <label class="ai-lbl">Class</label>
+            <select class="ai-sel" id="ai-class">
+              <option value="">Select Class...</option>
+              <option>Class 6-A</option><option>Class 6-B</option>
+              <option>Class 7-A</option><option>Class 7-B</option>
+              <option>Class 8-A</option><option>Class 8-B</option>
+              <option>Class 9-A</option><option>Class 9-B</option>
+              <option>Class 10-A</option><option>Class 10-B</option>
+              <option>Class 11 (Sci)</option><option>Class 11 (Com)</option>
+              <option>Class 12 (Sci)</option><option>Class 12 (Com)</option>
+            </select>
+          </div>
+          <div class="ai-fgrp">
+            <label class="ai-lbl">Attendance %</label>
+            <input class="ai-inp" id="ai-att" type="number" min="0" max="100" placeholder="e.g. 88"/>
+          </div>
+          <div class="ai-fgrp">
+            <label class="ai-lbl">Class Rank</label>
+            <input class="ai-inp" id="ai-rank" type="number" min="1" placeholder="e.g. 5"/>
+          </div>
+        </div>
+
+        <!-- Subject Marks -->
+        <div class="ai-marks-hd">📚 Subject-wise Marks <span style="font-size:9px;color:var(--tm);font-family:var(--fm)">(out of 100)</span></div>
+        <div class="ai-marks-grid" id="ai-marks-grid">
+          <!-- Populated dynamically based on class -->
+        </div>
+
+        <!-- Marks bar preview -->
+        <div id="ai-bars-preview" style="margin-top:14px;display:none">
+          <div class="ai-marks-hd" style="margin-bottom:8px">📊 Live Preview</div>
+          <div id="ai-bars-list"></div>
+        </div>
+
+        <button class="btn-analyse" id="btn-analyse" onclick="runAIAnalysis()">
+          <span class="btn-a-ico">🤖</span>
+          <span id="btn-analyse-txt">Analyse Student</span>
+        </button>
+      </div>
+
+      <!-- AI Output Card -->
+      <div class="pnl ai-output-card" id="ai-output-card">
+        <div class="pnl-hd">
+          <div class="pnl-t"><span class="dot gn"></span>AI Academic Report</div>
+          <div id="ai-student-badge" class="ai-out-badge" style="display:none"></div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="ai-empty" id="ai-empty-state">
+          <div class="ai-empty-ico">🎓</div>
+          <div class="ai-empty-t">No Analysis Yet</div>
+          <div class="ai-empty-s">Fill in student data and click <strong>Analyse Student</strong> or use the <strong>🎲 Random</strong> button to generate a sample student.</div>
+        </div>
+
+        <!-- Loading state -->
+        <div class="ai-loading" id="ai-loading" style="display:none">
+          <div class="ai-spin-ring"></div>
+          <div class="ai-loading-t">Analysing student data…</div>
+          <div class="ai-loading-s">Claude AI is generating personalized insights</div>
+        </div>
+
+        <!-- Result output -->
+        <div id="ai-result-area" style="display:none">
+
+          <!-- Exam Readiness Score -->
+          <div class="ai-score-banner" id="ai-score-banner">
+            <div class="ai-score-ring">
+              <svg viewBox="0 0 80 80" width="80" height="80"><circle class="ai-trk" cx="40" cy="40" r="32"/><circle class="ai-arc" id="ai-arc" cx="40" cy="40" r="32"/></svg>
+              <div class="ai-score-ctr"><span id="ai-score-num">--</span><span class="ai-score-sub">/100</span></div>
+            </div>
+            <div class="ai-score-info">
+              <div class="ai-score-lbl">EXAM READINESS SCORE</div>
+              <div class="ai-score-verdict" id="ai-score-verdict">—</div>
+              <div class="ai-score-desc" id="ai-score-desc">—</div>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div class="ai-section">
+            <div class="ai-sec-hd"><span class="ai-sec-ico">📋</span> Academic Summary</div>
+            <div class="ai-sec-body" id="ai-summary">—</div>
+          </div>
+
+          <!-- Strengths + Improvements row -->
+          <div class="ai-two-col">
+            <div class="ai-mini-card ai-green">
+              <div class="ai-mini-hd">💪 Top Strengths</div>
+              <div id="ai-strengths"></div>
+            </div>
+            <div class="ai-mini-card ai-amber">
+              <div class="ai-mini-hd">⚠️ Improvement Areas</div>
+              <div id="ai-improvements"></div>
+            </div>
+          </div>
+
+          <!-- Recommendations -->
+          <div class="ai-section">
+            <div class="ai-sec-hd"><span class="ai-sec-ico">📚</span> Personalized Recommendations</div>
+            <div id="ai-recommendations"></div>
+          </div>
+
+          <!-- Regenerate -->
+          <button class="btn-regen" onclick="runAIAnalysis()">↻ Regenerate Analysis</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Old static recommendations (below) -->
+    <div style="margin-top:28px">
+      <div class="sec-hd"><div class="sec-t">School-Level Recommendations</div></div>
+      <div class="rc-card"><div class="rc-hd"><span class="rct workload">Workload</span><span class="rcp h">● HIGH</span></div><div class="rc-t">Redistribute Teacher Workload</div><div class="rc-b">3 teachers currently exceed 46 periods/week — above NCTE limit. Reassign 3–4 periods to Part-Time Lecturers in Mathematics and English.</div></div>
+      <div class="rc-card"><div class="rc-hd"><span class="rct labs">Labs</span><span class="rcp m">● MED</span></div><div class="rc-t">Increase Laboratory Utilization</div><div class="rc-b">Labs are running at 40% capacity. Introduce 2 additional practical sessions per week for Classes 9–12. Estimated efficiency gain: +18%.</div></div>
+      <div class="rc-card"><div class="rc-hd"><span class="rct timetable">Timetable</span><span class="rcp m">● MED</span></div><div class="rc-t">Consolidate Single Periods</div><div class="rc-b">Schedule fragmentation reduces effective teaching time by ~12%. Merge isolated periods into double-period blocks for core subjects.</div></div>
+      <div class="rc-card"><div class="rc-hd"><span class="rct infra">Infra</span><span class="rcp l">● LOW</span></div><div class="rc-t">Smart Room Booking System</div><div class="rc-b">Deploy automated classroom booking to reduce idle time by 15%. Current manual process causes 3–4 hours/week of avoidable vacancy.</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       TAB: CONFLICTS
+  ══════════════════════════════════════ -->
+  <div class="tv" id="tv-conflicts">
+    <div class="sec-hd"><div class="sec-t">Conflict Log</div></div>
+    <div class="pnl">
+      <div class="cfl">
+        <div class="cfi cr"><div class="cfi-ico">🔴</div><div><div class="cfi-t">NCTE Violation — Teacher Overload</div><div class="cfi-d">Rajesh Kumar (Maths), Priya Sharma (Science), and Anand Gupta (English) are at 46, 47, and 46 periods respectively. NCTE ceiling is 40 periods/week.</div></div><div class="cfi-m">HIGH</div></div>
+        <div class="cfi wn"><div class="cfi-ico">🟡</div><div><div class="cfi-t">Lab Infrastructure Underuse</div><div class="cfi-d">Physics and Chemistry labs combined sit at 38% utilization. Annual opportunity cost estimated at Rs. 3.4 lakh. Practical schedule needs revision.</div></div><div class="cfi-m">MED</div></div>
+        <div class="cfi in"><div class="cfi-ico">🔵</div><div><div class="cfi-t">Schedule Fragmentation — Isolated Periods</div><div class="cfi-d">14 single-period slots scattered across the week reduce effective teaching time by approximately 12%. Double-period blocks recommended.</div></div><div class="cfi-m">LOW</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       TAB: SETTINGS
+  ══════════════════════════════════════ -->
+  <div class="tv" id="tv-settings">
+    <div class="sec-hd"><div class="sec-t">Settings & Student Profile</div></div>
+
+    <!-- Student Profile Form -->
+    <div class="profile-form" id="profile-edit-form">
+      <div class="profile-form-header">
+        <div class="profile-avatar-big" id="pf-avatar-big" onclick="triggerAvatarUpload()">
+          <span id="pf-avatar-emoji">🎓</span>
+          <img id="pf-avatar-img" src="" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:14px"/>
+          <div class="profile-avatar-overlay">📷</div>
+        </div>
+        <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)"/>
+        <div class="pf-hinfo">
+          <h2 id="pf-display-name">Student Profile</h2>
+          <p id="pf-display-class">Edit your personal information below</p>
+          <div style="margin-top:8px;font-size:10px;color:var(--ts);font-family:var(--fm)">All changes are saved automatically</div>
+        </div>
+      </div>
+
+      <div class="pf-grid">
+        <div class="pf-fgrp full pf-section-title">📋 Personal Information</div>
+
+        <div class="pf-fgrp">
+          <label class="pf-lbl">First Name</label>
+          <input class="pf-inp" id="pf-fn" placeholder="First name" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Last Name</label>
+          <input class="pf-inp" id="pf-ln" placeholder="Last name" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Date of Birth</label>
+          <input class="pf-inp" id="pf-dob" type="date" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Gender</label>
+          <select class="pf-sel" id="pf-gen" onchange="autoSaveProfile()">
+            <option value="">Select...</option>
+            <option>Male</option><option>Female</option><option>Other</option>
+          </select>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Phone Number</label>
+          <input class="pf-inp" id="pf-phone" placeholder="Mobile number" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Blood Group</label>
+          <select class="pf-sel" id="pf-blood" onchange="autoSaveProfile()">
+            <option value="">Select...</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+          </select>
+        </div>
+        <div class="pf-fgrp full">
+          <label class="pf-lbl">Address</label>
+          <textarea class="pf-textarea" id="pf-addr" placeholder="Residential address" oninput="autoSaveProfile()"></textarea>
+        </div>
+
+        <div class="pf-fgrp full pf-section-title">🎓 Academic Details</div>
+
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Admission Number</label>
+          <input class="pf-inp" id="pf-adm" placeholder="e.g. 24KV08001" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Roll Number</label>
+          <input class="pf-inp" id="pf-roll" placeholder="e.g. 12" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Class & Section</label>
+          <select class="pf-sel" id="pf-cls" onchange="autoSaveProfile()">
+            <option value="">Select...</option>
+            <option>Class 6-A</option><option>Class 6-B</option>
+            <option>Class 7-A</option><option>Class 7-B</option>
+            <option>Class 8-A</option><option>Class 8-B</option>
+            <option>Class 9-A</option><option>Class 9-B</option>
+            <option>Class 10-A</option><option>Class 10-B</option>
+            <option>Class 11 (Sci)</option><option>Class 11 (Com)</option>
+            <option>Class 12 (Sci)</option><option>Class 12 (Com)</option>
+          </select>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">House</label>
+          <select class="pf-sel" id="pf-house" onchange="autoSaveProfile()">
+            <option value="">Select...</option>
+            <option>Shivaji</option><option>Ashoka</option><option>Tagore</option><option>Raman</option>
+          </select>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Class Rank</label>
+          <input class="pf-inp" id="pf-rank" placeholder="e.g. 3" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Overall Average (%)</label>
+          <input class="pf-inp" id="pf-avg" placeholder="e.g. 87.4" type="number" min="0" max="100" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Attendance (%)</label>
+          <input class="pf-inp" id="pf-att" placeholder="e.g. 94" type="number" min="0" max="100" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Email</label>
+          <input class="pf-inp" id="pf-email" placeholder="student@email.com" type="email" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp full">
+          <label class="pf-lbl">Bio / About Me</label>
+          <textarea class="pf-textarea" id="pf-bio" placeholder="Tell us about your interests, hobbies, and goals..." oninput="autoSaveProfile()"></textarea>
+        </div>
+
+        <div class="pf-fgrp full pf-section-title">👨‍👩‍👧 Parent / Guardian Details</div>
+
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Father's Name</label>
+          <input class="pf-inp" id="pf-father" placeholder="Father's full name" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Mother's Name</label>
+          <input class="pf-inp" id="pf-mother" placeholder="Mother's full name" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Guardian Phone</label>
+          <input class="pf-inp" id="pf-gphone" placeholder="Guardian contact" oninput="autoSaveProfile()"/>
+        </div>
+        <div class="pf-fgrp">
+          <label class="pf-lbl">Emergency Contact</label>
+          <input class="pf-inp" id="pf-emerg" placeholder="Emergency number" oninput="autoSaveProfile()"/>
+        </div>
+      </div>
+
+      <div class="pf-save-row">
+        <button class="pf-save-btn" onclick="saveProfile()">💾 Save Changes</button>
+        <button class="pf-cancel-btn" onclick="resetProfile()">↩ Reset</button>
+        <div class="pf-saved-msg" id="pf-saved">✓ Profile saved successfully!</div>
+      </div>
+    </div>
+
+    <!-- App Settings -->
+    <div class="settings-grid">
+      <div class="ss">
+        <h3>🔔 Notifications</h3>
+        <div class="sr"><div><div class="sr-n">Exam Alerts</div><div class="sr-d">Upcoming tests & results</div></div><label class="tog"><input type="checkbox" checked/><span class="tog-s"></span></label></div>
+        <div class="sr"><div><div class="sr-n">Attendance Warnings</div><div class="sr-d">Below 75% threshold alert</div></div><label class="tog"><input type="checkbox" checked/><span class="tog-s"></span></label></div>
+        <div class="sr"><div><div class="sr-n">Assignment Reminders</div><div class="sr-d">24 hrs before due date</div></div><label class="tog"><input type="checkbox"/><span class="tog-s"></span></label></div>
+        <div class="sr"><div><div class="sr-n">Result Notifications</div><div class="sr-d">When marks are published</div></div><label class="tog"><input type="checkbox" checked/><span class="tog-s"></span></label></div>
+      </div>
+      <div class="ss">
+        <h3>🔒 Privacy & Security</h3>
+        <div class="sr"><div><div class="sr-n">Profile Visibility</div><div class="sr-d">Visible to teachers only</div></div><label class="tog"><input type="checkbox" checked/><span class="tog-s"></span></label></div>
+        <div class="sr"><div><div class="sr-n">Performance Sharing</div><div class="sr-d">Share with parents via app</div></div><label class="tog"><input type="checkbox" checked/><span class="tog-s"></span></label></div>
+        <div class="sr"><div><div class="sr-n">Two-Factor Auth</div><div class="sr-d">SMS OTP on login</div></div><label class="tog"><input type="checkbox"/><span class="tog-s"></span></label></div>
+      </div>
+      <div class="ss">
+        <h3>🎨 Display Preferences</h3>
+        <div class="sr"><div><div class="sr-n">Dark Mode</div><div class="sr-d">Always on for this app</div></div><label class="tog"><input type="checkbox" checked/><span class="tog-s"></span></label></div>
+        <div class="sr"><div><div class="sr-n">Compact View</div><div class="sr-d">Denser info layout</div></div><label class="tog"><input type="checkbox"/><span class="tog-s"></span></label></div>
+        <div class="sr"><div><div class="sr-n">Animations</div><div class="sr-d">Enable UI transitions</div></div><label class="tog"><input type="checkbox" checked/><span class="tog-s"></span></label></div>
+      </div>
+      <div class="ss">
+        <h3>📊 Data & Reports</h3>
+        <div class="sr"><div><div class="sr-n">Auto-sync Marks</div><div class="sr-d">Sync with school server</div></div><label class="tog"><input type="checkbox" checked/><span class="tog-s"></span></label></div>
+        <div class="sr"><div><div class="sr-n">Monthly Reports</div><div class="sr-d">PDF emailed to parents</div></div><label class="tog"><input type="checkbox"/><span class="tog-s"></span></label></div>
+        <div class="sr"><div><div class="sr-n">AI Analytics</div><div class="sr-d">Personalized study tips</div></div><label class="tog"><input type="checkbox" checked/><span class="tog-s"></span></label></div>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="pnl" style="border-color:var(--rdd)">
+      <div class="pnl-t" style="color:var(--rd);margin-bottom:12px"><span class="dot rd"></span>Account Actions</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button style="padding:9px 18px;border-radius:8px;border:1px solid var(--rd);background:var(--rdd);color:var(--rd);font-size:12px;cursor:pointer;font-family:var(--fd)" onclick="doLogout()">⏻ Sign Out</button>
+        <button style="padding:9px 18px;border-radius:8px;border:1px solid var(--bd);background:var(--bgc2);color:var(--ts);font-size:12px;cursor:pointer;font-family:var(--fd)">🔑 Change Password</button>
+        <button style="padding:9px 18px;border-radius:8px;border:1px solid var(--bd);background:var(--bgc2);color:var(--ts);font-size:12px;cursor:pointer;font-family:var(--fd)">📥 Download My Data</button>
+      </div>
+    </div>
+  </div><!-- /tv-settings -->
+
+  </div><!-- /content -->
+</main>
+
+</div><!-- /app -->
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+// ═══════════════════════════════════════
+// DATA & STORAGE
+// ═══════════════════════════════════════
+let currentUser = null;
+let charts = {};
+let autoSaveTimer = null;
+
+function saveToStorage(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+function loadFromStorage(key) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e) { return null; }
+}
+
+// ═══════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════
+function switchTab(t) {
+  document.getElementById('tab-login').classList.toggle('active', t==='login');
+  document.getElementById('tab-register').classList.toggle('active', t==='register');
+  document.getElementById('login-form').style.display = t==='login'?'block':'none';
+  document.getElementById('register-form').style.display = t==='register'?'block':'none';
+}
+
+// ── Seeded deterministic random (so same user always gets same data) ──
+function seededRand(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+function strToSeed(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  return Math.abs(h) || 1;
+}
+
+function generateAcademicProfile(email, cls) {
+  const rng = seededRand(strToSeed(email + cls));
+  const HOUSES = ['Shivaji','Ashoka','Tagore','Raman'];
+  const SUBJ_MAP = {
+    'Class 6-A':['English','Hindi','Mathematics','Science','Social Studies'],
+    'Class 6-B':['English','Hindi','Mathematics','Science','Social Studies'],
+    'Class 7-A':['English','Hindi','Mathematics','Science','Social Studies'],
+    'Class 7-B':['English','Hindi','Mathematics','Science','Social Studies'],
+    'Class 8-A':['English','Hindi','Mathematics','Science','Social Studies'],
+    'Class 8-B':['English','Hindi','Mathematics','Science','Social Studies'],
+    'Class 9-A':['English','Hindi','Mathematics','Science','Social Studies','IT'],
+    'Class 9-B':['English','Hindi','Mathematics','Science','Social Studies','IT'],
+    'Class 10-A':['English','Hindi','Mathematics','Science','Social Studies'],
+    'Class 10-B':['English','Hindi','Mathematics','Science','Social Studies'],
+    'Class 11 (Sci)':['English','Physics','Chemistry','Mathematics','Biology'],
+    'Class 11 (Com)':['English','Accountancy','Business Studies','Economics','Mathematics'],
+    'Class 12 (Sci)':['English','Physics','Chemistry','Mathematics','Biology'],
+    'Class 12 (Com)':['English','Accountancy','Business Studies','Economics','Mathematics'],
+  };
+  const subjects = SUBJ_MAP[cls] || SUBJ_MAP['Class 10-A'];
+  // Base academic level for this student (50–92)
+  const base = 50 + Math.floor(rng() * 42);
+  const marks = {};
+  subjects.forEach(s => {
+    const v = Math.max(30, Math.min(100, base + Math.floor(rng()*30) - 8));
+    marks[s] = v;
+  });
+  const vals = Object.values(marks);
+  const avg = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
+  const att = Math.max(55, Math.min(99, 60 + Math.floor(rng()*39)));
+  const rank = Math.max(1, Math.floor(rng()*35)+1);
+  const awards = Math.floor(rng()*18);
+  const roll = Math.floor(rng()*40)+1;
+  const house = HOUSES[Math.floor(rng()*4)];
+  // Build monthly trend (11 months, ending at avg)
+  const trend = [];
+  let cur = Math.max(40, parseFloat(avg) - 10 - Math.floor(rng()*8));
+  for (let i=0;i<11;i++) {
+    cur = Math.min(100, Math.max(35, cur + (rng()*4-1.2)));
+    trend.push(parseFloat(cur.toFixed(1)));
+  }
+  trend[10] = parseFloat(avg);
+  // Subject monthly trends (top 2 subjects)
+  const sortedSubj = Object.entries(marks).sort((a,b)=>b[1]-a[1]);
+  const subjTrends = {};
+  sortedSubj.slice(0,2).forEach(([name, score]) => {
+    let sc = Math.max(35, score - 12 - Math.floor(rng()*6));
+    const arr = [];
+    for(let i=0;i<11;i++) { sc = Math.min(100,Math.max(35,sc+(rng()*5-1.5))); arr.push(parseFloat(sc.toFixed(1))); }
+    arr[10]=score; subjTrends[name]=arr;
+  });
+  // Absent days count
+  const totalDays = 218;
+  const absentCount = Math.round(totalDays * (1 - att/100));
+  return { marks, avg, att: String(att), rank: String(rank), awards: String(awards),
+           roll: String(roll), house, trend, subjTrends, absentCount,
+           subjectCount: String(subjects.length) };
+}
+
+function doLogin() {
+  const u = document.getElementById('l-user').value.trim();
+  const p = document.getElementById('l-pass').value;
+  const err = document.getElementById('l-err');
+
+  if (!u || p.length < 6) { err.style.display='block'; return; }
+  err.style.display='none';
+
+  // Try to find existing account
+  const accounts = loadFromStorage('ss_accounts') || {};
+  let found = null;
+  for (let k in accounts) {
+    const acc = accounts[k];
+    if ((acc.email === u || acc.adm === u) && acc.password === p) {
+      found = acc;
+      break;
+    }
+  }
+
+  if (!found) {
+    // Demo: create deterministic guest session from email seed
+    const cls = 'Class 10-A';
+    const ap = generateAcademicProfile(u, cls);
+    found = {
+      email: u, password: p,
+      firstName: 'Student', lastName: '',
+      cls, adm: u, roll: ap.roll,
+      house: ap.house, rank: ap.rank, avg: ap.avg, att: ap.att,
+      awards: ap.awards, subjectCount: ap.subjectCount,
+      marks: ap.marks, trend: ap.trend, subjTrends: ap.subjTrends,
+      absentCount: ap.absentCount,
+      dob: '', phone: '', gender: '', blood: '', addr: '',
+      bio: '', father: '', mother: '', gphone: '', emerg: '',
+      avatarData: ''
+    };
+  }
+
+  currentUser = found;
+  saveToStorage('ss_session', found.email || found.adm);
+  launchApp();
+}
+
+function doRegister() {
+  const fn = document.getElementById('r-fn').value.trim();
+  const ln = document.getElementById('r-ln').value.trim();
+  const adm = document.getElementById('r-adm').value.trim();
+  const cls = document.getElementById('r-cls').value;
+  const email = document.getElementById('r-email').value.trim();
+  const dob = document.getElementById('r-dob').value;
+  const gen = document.getElementById('r-gen').value;
+  const p = document.getElementById('r-pass').value;
+  const p2 = document.getElementById('r-pass2').value;
+  const err = document.getElementById('r-err');
+  const ok = document.getElementById('r-ok');
+
+  if (!fn || !email || !cls || p.length < 6 || p !== p2) {
+    err.style.display='block'; ok.style.display='none';
+    err.textContent = p !== p2 ? 'Passwords do not match.' : 'Please fill all required fields (first name, email, class, password ≥6 chars).';
+    return;
+  }
+  err.style.display='none';
+
+  const accounts = loadFromStorage('ss_accounts') || {};
+  const ap = generateAcademicProfile(email, cls);
+  const newUser = {
+    email, password: p, firstName: fn, lastName: ln,
+    adm, cls, dob, gender: gen,
+    roll: ap.roll, house: ap.house, rank: ap.rank, avg: ap.avg, att: ap.att,
+    awards: ap.awards, subjectCount: ap.subjectCount,
+    marks: ap.marks, trend: ap.trend, subjTrends: ap.subjTrends,
+    absentCount: ap.absentCount,
+    phone: '', blood: '', addr: '', bio: '', father: '', mother: '', gphone: '', emerg: '',
+    avatarData: ''
+  };
+  accounts[email] = newUser;
+  saveToStorage('ss_accounts', accounts);
+
+  ok.style.display='block';
+  currentUser = newUser;
+  saveToStorage('ss_session', email);
+  setTimeout(launchApp, 1000);
+}
+
+function doLogout() {
+  saveToStorage('ss_session', null);
+  currentUser = null;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('auth-screen').classList.remove('hidden');
+  Object.values(charts).forEach(c => { try{c.destroy()}catch(e){} });
+  charts = {};
+}
+
+// ═══════════════════════════════════════
+// APP LAUNCH
+// ═══════════════════════════════════════
+function launchApp() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('show');
+  // Destroy any existing charts so they rebuild fresh with this user's data
+  Object.values(charts).forEach(c => { try{c.destroy()}catch(e){} });
+  charts = {};
+  applyProfileToDashboard();
+  setTimeout(()=>{
+    initPerfChart();
+    initRadarChart();
+    buildHeatmap();
+    initResourceDashboard();
+    updScore(48.5);
+    initAcadCharts();
+  }, 100);
+  populateSettingsForm();
+}
+
+// ═══════════════════════════════════════
+// PROFILE APPLICATION TO WHOLE DASHBOARD
+// ═══════════════════════════════════════
+function applyProfileToDashboard() {
+  if (!currentUser) return;
+  const u = currentUser;
+  const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || 'Student';
+  const cls = u.cls || 'Class --';
+  const rankNum = u.rank || '1';
+  const rank = '#' + rankNum;
+  const avg = u.avg || '87.4';
+  const att = u.att || '94';
+  const awards = u.awards || '0';
+  const subjCount = u.subjectCount || '5';
+  const absentCount = u.absentCount || Math.round(218*(1-parseInt(att)/100));
+  const presentCount = 218 - absentCount;
+  const attPct = parseInt(att);
+  const attStatus = attPct >= 85 ? 'ok' : attPct >= 75 ? 'wn' : 'cr';
+  const attLabel = attPct >= 85 ? 'WITHIN LIMIT' : attPct >= 75 ? 'BORDERLINE' : 'CRITICAL';
+
+  // ── Sidebar ──
+  document.getElementById('sb-name').textContent = name;
+  document.getElementById('sb-class').textContent = cls + ' · CBSE';
+  const sbAv = document.getElementById('sb-avatar');
+  if (u.avatarData) sbAv.innerHTML = `<img src="${u.avatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:7px"/>`;
+  else sbAv.textContent = (u.firstName||'S')[0].toUpperCase();
+
+  // ── Hero ──
+  document.getElementById('hero-name').textContent = name;
+  document.getElementById('hero-class').textContent = cls;
+  document.getElementById('hero-rank').textContent = 'Rank ' + rank;
+  document.getElementById('hero-adm').textContent = u.adm || '--';
+  document.getElementById('hero-roll').textContent = u.roll || '--';
+  document.getElementById('hero-house').textContent = u.house || '--';
+  document.getElementById('hero-dob').textContent = u.dob ? new Date(u.dob).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '--';
+  document.getElementById('hero-phone').textContent = u.phone || '--';
+  const heroAv = document.getElementById('hero-avatar');
+  if (u.avatarData) heroAv.innerHTML = `<img src="${u.avatarData}" style="width:100%;height:100%;object-fit:cover"/>`;
+  else heroAv.textContent = (u.firstName||'🎓')[0].toUpperCase() || '🎓';
+  document.getElementById('hero-avg').textContent = avg + '%';
+  document.getElementById('hero-att').textContent = att + '%';
+  document.getElementById('hero-rank-val').textContent = rank;
+
+  // ── Quick Stats ──
+  document.getElementById('qs-avg').textContent = avg;
+  document.getElementById('qs-att').textContent = att + '%';
+  document.getElementById('qs-rank').textContent = rank;
+
+  // Subjects stat
+  const qsSubj = document.getElementById('qs-subj');
+  if (qsSubj) qsSubj.textContent = subjCount;
+  // Awards stat
+  const qsAward = document.getElementById('qs-awards');
+  if (qsAward) qsAward.textContent = awards;
+
+  // ── Quick stat trend lines (avg, att, rank) ──
+  const avgF = parseFloat(avg);
+  const prevAvg = (avgF - 1.5 - Math.random()).toFixed(1);
+  const diffAvg = (avgF - prevAvg).toFixed(1);
+  const trendAvg = document.getElementById('qs-trend-avg');
+  if (trendAvg) { trendAvg.textContent = '↑ +'+diffAvg+' this term'; trendAvg.className='qs-trend up'; }
+
+  const trendAtt = document.getElementById('qs-trend-att');
+  if (trendAtt) { trendAtt.textContent = '→ '+absentCount+' absent'; trendAtt.className='qs-trend eq'; }
+
+  const rn = parseInt(rankNum);
+  const trendRank = document.getElementById('qs-trend-rank');
+  if (trendRank) {
+    const prevRank = rn + Math.floor(Math.random()*3)+1;
+    trendRank.textContent = '↑ +'+(prevRank-rn)+' positions';
+    trendRank.className = 'qs-trend up';
+  }
+
+  const trendAward = document.getElementById('qs-trend-awards');
+  if (trendAward) { trendAward.textContent = '↑ +'+Math.min(parseInt(awards),3)+' this year'; trendAward.className='qs-trend up'; }
+
+  // ── Subject Bars on Profile tab ──
+  const marks = u.marks || {};
+  const subjColors = ['tl','gn','bl','am','pu','pk','rd'];
+  const subjIcons = {'Mathematics':'📐','Science':'🔬','English':'📖','Hindi':'📜',
+    'Social Studies':'🌍','Physics':'⚛️','Chemistry':'🧪','Biology':'🧬',
+    'Computer Science':'💻','IT':'💻','Accountancy':'📒','Business Studies':'💼',
+    'Economics':'📈','SS':'🌍','Social Science':'🌍'};
+  const gradeLabel = v => v>=91?'A1':v>=81?'A2':v>=71?'B1':v>=61?'B2':v>=51?'C1':'C2';
+  const gradeColor = v => v>=91?'var(--tl)':v>=81?'var(--gn)':v>=71?'var(--bl)':v>=61?'var(--am)':'var(--rd)';
+
+  const subjList = document.getElementById('profile-subj-list');
+  if (subjList && Object.keys(marks).length > 0) {
+    subjList.innerHTML = Object.entries(marks).map(([sub,score],i) => {
+      const col = subjColors[i % subjColors.length];
+      const ico = subjIcons[sub] || '📚';
+      return `<div class="subj-row">
+        <div class="subj-meta">
+          <div class="subj-name">${ico} ${sub}</div>
+          <div class="subj-score" style="color:${gradeColor(score)}">${score}/100<span class="subj-grades"> ${gradeLabel(score)}</span></div>
+        </div>
+        <div class="pb"><div class="pf ${col}" style="width:${score}%"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Academics Table ──
+  const acadTbody = document.getElementById('acad-tbody');
+  if (acadTbody && Object.keys(marks).length > 0) {
+    acadTbody.innerHTML = Object.entries(marks).map(([sub, score]) => {
+      // Synthesise plausible FA/SA breakdown
+      const rng2 = seededRand(strToSeed(sub + (u.email||'x')));
+      const fa1 = Math.round(score*0.25 + rng2()*2);
+      const fa2 = Math.round(score*0.24 + rng2()*2);
+      const sa1 = Math.round(score*0.82 + rng2()*4 - 2);
+      const fa3 = Math.round(score*0.24 + rng2()*2);
+      const fa4 = Math.round(score*0.23 + rng2()*2);
+      const grade = gradeLabel(score);
+      const stagClass = score>=81?'ok':score>=61?'wn':'cr';
+      return `<tr>
+        <td>${sub}</td><td>${Math.min(25,fa1)}</td><td>${Math.min(25,fa2)}</td>
+        <td>${Math.min(90,sa1)}</td><td>${Math.min(25,fa3)}</td><td>${Math.min(25,fa4)}</td>
+        <td>–</td>
+        <td style="color:${gradeColor(score)};font-family:var(--fm)">${score}%</td>
+        <td><span class="stag ${stagClass}">${grade}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Grade doughnut data ──
+  const a1=Object.values(marks).filter(v=>v>=91).length;
+  const a2=Object.values(marks).filter(v=>v>=81&&v<91).length;
+  const b1=Object.values(marks).filter(v=>v>=71&&v<81).length;
+  const b2=Object.values(marks).filter(v=>v>=61&&v<71).length;
+  if (charts.grade) { charts.grade.data.datasets[0].data=[a1,a2,b1,b2]; charts.grade.update('none'); }
+
+  // ── Attendance tab ──
+  const attPresentEl = document.getElementById('att-present');
+  if (attPresentEl) attPresentEl.textContent = presentCount;
+  const attAbsentEl = document.getElementById('att-absent');
+  if (attAbsentEl) attAbsentEl.textContent = absentCount;
+  const attPctEl = document.getElementById('att-pct-bar');
+  if (attPctEl) { attPctEl.style.width = att+'%'; }
+  const attAbsPctEl = document.getElementById('att-abs-pct-bar');
+  if (attAbsPctEl) attAbsPctEl.style.width = (100-attPct)+'%';
+  const attStag = document.getElementById('att-status-tag');
+  if (attStag) { attStag.textContent = attLabel; attStag.className='stag '+attStatus; }
+  const attPctTag = document.getElementById('att-pct-tag');
+  if (attPctTag) { attPctTag.textContent = att+'%'; attPctTag.className='stag '+attStatus; }
+
+  // ── Page labels ──
+  document.getElementById('pf-display-name').textContent = name;
+  document.getElementById('pf-display-class').textContent = cls + (u.adm ? ' · ' + u.adm : '');
+  document.getElementById('tt-class-label').textContent = cls;
+
+  // ── Radar chart label ──
+  if (charts.radar) { charts.radar.data.datasets[0].label = u.firstName || 'Student'; charts.radar.update('none'); }
+
+  // ── Auto-populate AI Analyser with this user's data ──
+  autoFillAIAnalyser();
+}
+
+// ═══════════════════════════════════════
+// SETTINGS FORM
+// ═══════════════════════════════════════
+function populateSettingsForm() {
+  if (!currentUser) return;
+  const u = currentUser;
+  const fields = {
+    'pf-fn': u.firstName, 'pf-ln': u.lastName,
+    'pf-dob': u.dob, 'pf-gen': u.gender,
+    'pf-phone': u.phone, 'pf-blood': u.blood,
+    'pf-addr': u.addr, 'pf-adm': u.adm,
+    'pf-roll': u.roll, 'pf-cls': u.cls,
+    'pf-house': u.house, 'pf-rank': u.rank,
+    'pf-avg': u.avg, 'pf-att': u.att,
+    'pf-email': u.email, 'pf-bio': u.bio,
+    'pf-father': u.father, 'pf-mother': u.mother,
+    'pf-gphone': u.gphone, 'pf-emerg': u.emerg
+  };
+  for (let id in fields) {
+    const el = document.getElementById(id);
+    if (el && fields[id]) el.value = fields[id];
+  }
+  // Avatar
+  if (u.avatarData) {
+    document.getElementById('pf-avatar-img').src = u.avatarData;
+    document.getElementById('pf-avatar-img').style.display = 'block';
+    document.getElementById('pf-avatar-emoji').style.display = 'none';
+  }
+}
+
+function collectFormData() {
+  return {
+    firstName: document.getElementById('pf-fn').value.trim(),
+    lastName: document.getElementById('pf-ln').value.trim(),
+    dob: document.getElementById('pf-dob').value,
+    gender: document.getElementById('pf-gen').value,
+    phone: document.getElementById('pf-phone').value.trim(),
+    blood: document.getElementById('pf-blood').value,
+    addr: document.getElementById('pf-addr').value.trim(),
+    adm: document.getElementById('pf-adm').value.trim(),
+    roll: document.getElementById('pf-roll').value.trim(),
+    cls: document.getElementById('pf-cls').value,
+    house: document.getElementById('pf-house').value,
+    rank: document.getElementById('pf-rank').value.trim(),
+    avg: document.getElementById('pf-avg').value.trim(),
+    att: document.getElementById('pf-att').value.trim(),
+    email: document.getElementById('pf-email').value.trim(),
+    bio: document.getElementById('pf-bio').value.trim(),
+    father: document.getElementById('pf-father').value.trim(),
+    mother: document.getElementById('pf-mother').value.trim(),
+    gphone: document.getElementById('pf-gphone').value.trim(),
+    emerg: document.getElementById('pf-emerg').value.trim(),
+  };
+}
+
+function saveProfile() {
+  const data = collectFormData();
+  Object.assign(currentUser, data);
+
+  // Persist in accounts store
+  if (currentUser.email) {
+    const accounts = loadFromStorage('ss_accounts') || {};
+    accounts[currentUser.email] = currentUser;
+    saveToStorage('ss_accounts', accounts);
+  }
+  saveToStorage('ss_session', currentUser.email || currentUser.adm);
+
+  // Update header in settings form
+  const name = [currentUser.firstName, currentUser.lastName].filter(Boolean).join(' ') || 'Student';
+  document.getElementById('pf-display-name').textContent = name;
+  document.getElementById('pf-display-class').textContent = (currentUser.cls||'--') + (currentUser.adm ? ' · ' + currentUser.adm : '');
+
+  // Apply to whole dashboard
+  applyProfileToDashboard();
+
+  // Refresh performance + radar charts with new data
+  if (charts.perf) { charts.perf.destroy(); delete charts.perf; initPerfChart(); }
+  if (charts.radar) { charts.radar.destroy(); delete charts.radar; initRadarChart(); }
+  if (charts.acad) { charts.acad.destroy(); delete charts.acad; }
+  if (charts.grade) { charts.grade.destroy(); delete charts.grade; }
+
+  // Show saved message
+  const msg = document.getElementById('pf-saved');
+  msg.classList.add('show');
+  setTimeout(()=>msg.classList.remove('show'), 2500);
+}
+
+function resetProfile() {
+  populateSettingsForm();
+}
+
+function autoSaveProfile() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(saveProfile, 1500);
+}
+
+// Avatar upload
+function triggerAvatarUpload() {
+  document.getElementById('avatar-file-input').click();
+}
+
+function handleAvatarUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const data = ev.target.result;
+    currentUser.avatarData = data;
+    document.getElementById('pf-avatar-img').src = data;
+    document.getElementById('pf-avatar-img').style.display = 'block';
+    document.getElementById('pf-avatar-emoji').style.display = 'none';
+    autoSaveProfile();
+    applyProfileToDashboard();
+  };
+  reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+const TITLES = {
+  profile: ['My Profile','SmartSchool AI / My Profile'],
+  academics: ['Academic Records','SmartSchool AI / Academics'],
+  schedule: ['My Timetable','SmartSchool AI / Timetable'],
+  attendance: ['Attendance','SmartSchool AI / Attendance'],
+  resource: ['Resource Dashboard','SmartSchool AI / Resource Overview'],
+  recommend: ['AI Recommendations','SmartSchool AI / Recommendations'],
+  conflicts: ['Conflict Log','SmartSchool AI / Conflicts'],
+  settings: ['Settings & Profile','SmartSchool AI / Settings'],
+};
+
+function nav(id, el) {
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.tv').forEach(t=>t.classList.remove('on'));
+  const tv = document.getElementById('tv-'+id);
+  if (tv) tv.classList.add('on');
+  const t = TITLES[id] || TITLES.profile;
+  document.getElementById('top-t').textContent = t[0];
+  document.getElementById('top-b').textContent = t[1];
+  // Close sidebar on mobile
+  if (window.innerWidth < 900) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sb-overlay').classList.remove('show');
+  }
+  // Lazy init charts
+  if (id === 'resource' && !charts.rc) initResourceDashboard();
+  if (id === 'academics' && !charts.acad) initAcadCharts();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sb-overlay').classList.toggle('show');
+}
+
+// ═══════════════════════════════════════
+// PERFORMANCE CHART
+// ═══════════════════════════════════════
+function initPerfChart() {
+  if (charts.perf) return;
+  const u = currentUser || {};
+  const trend = u.trend || [78,80,79,82,81,83,84,85,86,87,87.4];
+  const subjTrends = u.subjTrends || {};
+  const subjNames = Object.keys(subjTrends);
+  const s1name = subjNames[0] || 'Subject 1';
+  const s2name = subjNames[1] || 'Subject 2';
+  const s1data = subjTrends[s1name] || trend.map(v=>Math.min(100,v+6));
+  const s2data = subjTrends[s2name] || trend.map(v=>Math.max(35,v-4));
+  const classAvg = trend.map(v => parseFloat((v * 0.88).toFixed(1)));
+  charts.perf = new Chart(document.getElementById('perfChart'), {
+    type:'line',
+    data:{
+      labels:['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'],
+      datasets:[
+        {label:'Overall %',data:trend,borderColor:'#00c9b1',backgroundColor:'rgba(0,201,177,.08)',tension:0.4,pointBackgroundColor:'#00c9b1',pointBorderColor:'#050c14',pointRadius:4,fill:true,borderWidth:2},
+        {label:s1name,data:s1data,borderColor:'#4fc3f7',backgroundColor:'transparent',tension:0.4,pointRadius:3,borderWidth:1.5,borderDash:[4,3]},
+        {label:s2name,data:s2data,borderColor:'#26d98b',backgroundColor:'transparent',tension:0.4,pointRadius:3,borderWidth:1.5,borderDash:[4,3]},
+        {label:'Class Avg',data:classAvg,borderColor:'rgba(245,166,35,.4)',backgroundColor:'transparent',tension:0.4,pointRadius:0,borderWidth:1,borderDash:[6,4]}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'#1a2d47'},ticks:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9}}},y:{grid:{color:'#1a2d47'},ticks:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9}},min:30,max:100}},plugins:{legend:{labels:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9},boxWidth:12,padding:10}}},interaction:{mode:'index',intersect:false}}
+  });
+}
+
+// ═══════════════════════════════════════
+// RADAR CHART
+// ═══════════════════════════════════════
+function initRadarChart() {
+  if (charts.radar) return;
+  const u = currentUser || {};
+  const name = (u.firstName) || 'Student';
+  const marks = u.marks || {};
+  const vals = Object.values(marks);
+  const avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 75;
+  // Derive radar axes from marks + avg
+  const rng = seededRand(strToSeed((u.email||'x')+'radar'));
+  const radarData = [
+    Math.min(100, Math.max(40, (marks['Mathematics']||marks['Maths']||avg) + rng()*4-2)),
+    Math.min(100, Math.max(40, (marks['Science']||marks['Physics']||marks['Chemistry']||avg) + rng()*4-2)),
+    Math.min(100, Math.max(40, (marks['English']||marks['Hindi']||avg) + rng()*4-2)),
+    Math.min(100, Math.max(40, avg + rng()*10 - 3)),
+    Math.min(100, Math.max(40, avg + rng()*14 - 7)),
+    Math.min(100, Math.max(40, parseFloat(u.att||75) + rng()*10-5)),
+    Math.min(100, Math.max(40, avg + rng()*12 - 4)),
+  ].map(v => parseFloat(v.toFixed(1)));
+  const classAvgRadar = radarData.map(v => parseFloat(Math.max(40, v*0.85).toFixed(1)));
+  charts.radar = new Chart(document.getElementById('radarChart'), {
+    type:'radar',
+    data:{
+      labels:['Mathematics','Science','Language','Critical Thinking','Creativity','Discipline','Leadership'],
+      datasets:[
+        {label:name,data:radarData,backgroundColor:'rgba(0,201,177,.12)',borderColor:'#00c9b1',pointBackgroundColor:'#00c9b1',pointBorderColor:'#050c14',borderWidth:2,pointRadius:4},
+        {label:'Class Avg',data:classAvgRadar,backgroundColor:'rgba(245,166,35,.05)',borderColor:'rgba(245,166,35,.4)',pointBackgroundColor:'#f5a623',pointBorderColor:'#050c14',borderWidth:1.5,pointRadius:3,borderDash:[4,4]}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:40,max:100,grid:{color:'#1a2d47'},angleLines:{color:'#1a2d47'},ticks:{display:false},pointLabels:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9}}}},plugins:{legend:{labels:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9},boxWidth:10,padding:8}}}}
+  });
+}
+
+// ═══════════════════════════════════════
+// ATTENDANCE HEATMAP
+// ═══════════════════════════════════════
+function buildHeatmap() {
+  const u = currentUser || {};
+  const absentCount = u.absentCount || 13;
+  const months=['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  const daysPerMonth=[25,26,25,25,26,25,24,25,21,26,20,0];
+  const totalDays = daysPerMonth.reduce((a,b)=>a+b,0);
+  // Spread absent days deterministically based on user seed
+  const rng = seededRand(strToSeed((u.email||'x')+'heatmap'));
+  const allDays = [];
+  for (let i=0;i<totalDays;i++) allDays.push(i);
+  // Fisher-Yates shuffle first N
+  const shuffled = [...allDays];
+  for (let i=shuffled.length-1;i>0;i--) { const j=Math.floor(rng()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+  const absentDays = new Set(shuffled.slice(0, Math.min(absentCount, totalDays)));
+  const hm=document.getElementById('heatmap');
+  if(!hm)return;
+  hm.innerHTML='';
+  hm.appendChild(Object.assign(document.createElement('div'),{className:'hm-month'}));
+  months.forEach(m=>{hm.appendChild(Object.assign(document.createElement('div'),{className:'hm-month',textContent:m}));});
+  let dayCount=0;
+  for(let row=0;row<5;row++){
+    hm.appendChild(Object.assign(document.createElement('div'),{className:'hm-day-lbl',textContent:row<4?`W${row+1}`:''}));
+    daysPerMonth.forEach((days,mi)=>{
+      const cell=document.createElement('div');cell.className='hm-cell';
+      if(days===0||row*5>=days){cell.style.background='transparent';}
+      else{
+        const globalDay=dayCount+row;
+        const absent=absentDays.has(globalDay);
+        const intensity=absent?0:(0.4+rng()*0.6);
+        cell.style.background=absent?`rgba(255,71,87,0.7)`:`rgba(0,201,177,${intensity})`;
+        cell.title=absent?'Absent':'Present';
+      }
+      hm.appendChild(cell);
+    });
+    dayCount+=daysPerMonth.reduce((a,b)=>a+(Math.min(5,b)>row?1:0),0);
+  }
+}
+
+// ═══════════════════════════════════════
+// RESOURCE DASHBOARD
+// ═══════════════════════════════════════
+function initResourceDashboard() {
+  if(charts.rc)return;
+  charts.rc=new Chart(document.getElementById('rc'),{
+    type:'radar',
+    data:{labels:['Classrooms','Labs','Teacher Load','Sections','Lab Safety','Schedule'],datasets:[
+      {label:'Current',data:[55,40,87,72,80,60],backgroundColor:'rgba(0,201,177,.1)',borderColor:'#00c9b1',pointBackgroundColor:'#00c9b1',pointBorderColor:'#050c14',borderWidth:2,pointRadius:4},
+      {label:'Target',data:[80,75,90,85,90,80],backgroundColor:'rgba(245,166,35,.06)',borderColor:'rgba(245,166,35,.4)',pointBackgroundColor:'#f5a623',pointBorderColor:'#050c14',borderWidth:1.5,pointRadius:3,borderDash:[4,4]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,grid:{color:'#1a2d47'},angleLines:{color:'#1a2d47'},ticks:{display:false},pointLabels:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9}}}},plugins:{legend:{labels:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9},boxWidth:10}}}}
+  });
+  charts.bc=new Chart(document.getElementById('bc'),{
+    type:'bar',
+    data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat'],datasets:[
+      {label:'Classroom hrs',data:[6.2,5.8,6.0,5.5,5.8,2.0],backgroundColor:'rgba(0,201,177,.7)',borderRadius:4},
+      {label:'Lab hrs',data:[2.5,2.0,2.5,2.0,2.5,0.5],backgroundColor:'rgba(245,166,35,.7)',borderRadius:4},
+      {label:'Teacher hrs',data:[8.2,8.0,8.5,8.0,8.2,2.6],backgroundColor:'rgba(255,71,87,.6)',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'#1a2d47'},ticks:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9}}},y:{grid:{color:'#1a2d47'},ticks:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9}},max:10}},plugins:{legend:{labels:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9},boxWidth:10,padding:12}}}}
+  });
+}
+
+// ═══════════════════════════════════════
+// ACADEMICS CHARTS
+// ═══════════════════════════════════════
+function initAcadCharts() {
+  if(charts.acad)return;
+  const u = currentUser || {};
+  const trend = u.trend || [78,80,79,82,81,83,84,85,86,87,87.4];
+  const avg = parseFloat(u.avg || 87.4);
+  const marks = u.marks || {};
+  // Grade distribution
+  const a1=Object.values(marks).filter(v=>v>=91).length;
+  const a2=Object.values(marks).filter(v=>v>=81&&v<91).length;
+  const b1=Object.values(marks).filter(v=>v>=71&&v<81).length;
+  const b2=Object.values(marks).filter(v=>v>=61&&v<71).length;
+  charts.acad=new Chart(document.getElementById('acadChart'),{
+    type:'line',
+    data:{labels:['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'],datasets:[
+      {label:'Score %',data:trend,borderColor:'#00c9b1',backgroundColor:'rgba(0,201,177,.1)',tension:0.4,fill:true,pointBackgroundColor:'#00c9b1',pointRadius:4,borderWidth:2},
+      {label:'Target',data:Array(11).fill(Math.round(avg*0.9)),borderColor:'rgba(167,139,250,.5)',borderDash:[5,5],tension:0,pointRadius:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'#1a2d47'},ticks:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9}}},y:{grid:{color:'#1a2d47'},ticks:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9}},min:30,max:100}},plugins:{legend:{labels:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9},boxWidth:10}}}}
+  });
+  charts.grade=new Chart(document.getElementById('gradeChart'),{
+    type:'doughnut',
+    data:{labels:['A1 (≥91)','A2 (81–90)','B1 (71–80)','B2 (61–70)'],datasets:[{data:[a1,a2,b1,b2],backgroundColor:['rgba(0,201,177,.85)','rgba(38,217,139,.7)','rgba(79,195,247,.7)','rgba(245,166,35,.6)'],borderColor:'#050c14',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#7a9cc0',font:{family:'JetBrains Mono',size:9},boxWidth:10,padding:8}}}}
+  });
+}
+
+// ═══════════════════════════════════════
+// SCORE & SLIDERS
+// ═══════════════════════════════════════
+function updScore(score){
+  const circ=2*Math.PI*34;
+  const arc=document.getElementById('s-arc');
+  if(!arc)return;
+  arc.style.strokeDasharray=circ;
+  arc.style.strokeDashoffset=circ-(score/100)*circ;
+  arc.style.stroke=score>=70?'#26d98b':score>=50?'#f5a623':'#ff4757';
+  document.getElementById('s-n').textContent=score.toFixed(1);
+  const v=document.getElementById('s-v');
+  v.textContent=score>=80?'Excellent':score>=65?'Good':score>=50?'Needs Attention':'Critical';
+  v.style.color=score>=70?'#26d98b':score>=50?'#f5a623':'#ff4757';
+}
+
+function calcScore(cr,lb,tw){
+  const s=c=>c<=90?(c/90)*100:Math.max(0,100-(c-90)*2);
+  const c=(tw>100?1:0)+(cr<50?1:0)+(lb<50?1:0)+(cr>90?1:0);
+  return Math.max(0,Math.min(100,s(cr)*.35+s(lb)*.25+s(tw)*.40-c*5));
+}
+
+function updCards(cr,lb,tw){
+  document.getElementById('cr-p').textContent=Math.round(cr)+'%';
+  document.getElementById('cr-b').style.width=Math.min(cr,100)+'%';
+  document.getElementById('lb-p').textContent=Math.round(lb)+'%';
+  document.getElementById('lb-b').style.width=Math.min(lb,100)+'%';
+  document.getElementById('tw-p').textContent=Math.round(tw)+'%';
+  document.getElementById('tw-b').style.width=Math.min(tw,100)+'%';
+  updScore(calcScore(cr,lb,tw));
+  if(charts.rc){charts.rc.data.datasets[0].data=[cr*.9,lb,Math.min(tw,100),72,80,60];charts.rc.update('none');}
+}
+
+function upSlider(id,val){
+  document.getElementById('sv-'+id).textContent=val+'%';
+  updCards(+document.getElementById('sl-cr').value,+document.getElementById('sl-lb').value,+document.getElementById('sl-tw').value);
+}
+
+function runAnalysis(){
+  updCards(+document.getElementById('sl-cr').value,+document.getElementById('sl-lb').value,+document.getElementById('sl-tw').value);
+  const b=document.getElementById('tv-resource').querySelector('.score-banner');
+  if(b){b.style.borderColor='#00c9b155';setTimeout(()=>b.style.borderColor='',700);}
+}
+
+// ═══════════════════════════════════════
+// AI STUDENT ANALYSER
+// ═══════════════════════════════════════
+
+const SUBJECT_MAP = {
+  'Class 6-A':['English','Hindi','Mathematics','Science','Social Studies'],
+  'Class 6-B':['English','Hindi','Mathematics','Science','Social Studies'],
+  'Class 7-A':['English','Hindi','Mathematics','Science','Social Studies'],
+  'Class 7-B':['English','Hindi','Mathematics','Science','Social Studies'],
+  'Class 8-A':['English','Hindi','Mathematics','Science','Social Studies'],
+  'Class 8-B':['English','Hindi','Mathematics','Science','Social Studies'],
+  'Class 9-A':['English','Hindi','Mathematics','Science','Social Studies','IT'],
+  'Class 9-B':['English','Hindi','Mathematics','Science','Social Studies','IT'],
+  'Class 10-A':['English','Hindi','Mathematics','Science','Social Studies'],
+  'Class 10-B':['English','Hindi','Mathematics','Science','Social Studies'],
+  'Class 11 (Sci)':['English','Physics','Chemistry','Mathematics','Biology'],
+  'Class 11 (Com)':['English','Accountancy','Business Studies','Economics','Mathematics'],
+  'Class 12 (Sci)':['English','Physics','Chemistry','Mathematics','Biology'],
+  'Class 12 (Com)':['English','Accountancy','Business Studies','Economics','Mathematics'],
+};
+
+const DEFAULT_CLASS = 'Class 10-A';
+
+const RANDOM_NAMES = [
+  'Aarav Sharma','Priya Mehta','Riya Patel','Arjun Gupta','Sneha Verma',
+  'Rohan Singh','Ananya Nair','Kabir Joshi','Divya Reddy','Aditya Kumar',
+  'Neha Choudhary','Vikram Iyer','Pooja Tiwari','Rahul Dubey','Simran Kaur',
+  'Yash Aggarwal','Kritika Bhatt','Manav Saxena','Ishaan Malhotra','Tanvi Desai'
+];
+
+function getSubjectsForClass(cls) {
+  return SUBJECT_MAP[cls] || SUBJECT_MAP[DEFAULT_CLASS];
+}
+
+function buildMarksGrid(cls) {
+  const subjects = getSubjectsForClass(cls || DEFAULT_CLASS);
+  const grid = document.getElementById('ai-marks-grid');
+  grid.innerHTML = '';
+  subjects.forEach(sub => {
+    const row = document.createElement('div');
+    row.className = 'ai-mark-row';
+    row.innerHTML = `
+      <span class="ai-mark-name">${sub}</span>
+      <input class="ai-mark-inp" id="mark-${sub.replace(/\s/g,'_')}" 
+        type="number" min="0" max="100" placeholder="--" 
+        oninput="updateBarPreview()" 
+        onchange="colorMarkInput(this)"/>
+    `;
+    grid.appendChild(row);
+  });
+  updateBarPreview();
+}
+
+function colorMarkInput(inp) {
+  const v = parseInt(inp.value);
+  inp.classList.remove('strong','weak','mid');
+  if (!inp.value) return;
+  if (v >= 85) inp.classList.add('strong');
+  else if (v < 75) inp.classList.add('weak');
+  else inp.classList.add('mid');
+}
+
+function updateBarPreview() {
+  const cls = document.getElementById('ai-class').value || DEFAULT_CLASS;
+  const subjects = getSubjectsForClass(cls);
+  const barsList = document.getElementById('ai-bars-list');
+  const preview = document.getElementById('ai-bars-preview');
+  
+  let hasAny = false;
+  let html = '';
+  subjects.forEach(sub => {
+    const inp = document.getElementById('mark-'+sub.replace(/\s/g,'_'));
+    const val = inp ? parseInt(inp.value) : NaN;
+    if (!isNaN(val) && val >= 0) hasAny = true;
+    const pct = isNaN(val) ? 0 : Math.min(100, val);
+    const color = val >= 85 ? 'var(--gn)' : val < 75 ? 'var(--rd)' : 'var(--am)';
+    const textColor = val >= 85 ? 'var(--gn)' : val < 75 ? 'var(--rd)' : 'var(--am)';
+    html += `
+      <div class="ai-bar-row">
+        <span class="ai-bar-subj">${sub}</span>
+        <div class="ai-bar-track"><div class="ai-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="ai-bar-score" style="color:${isNaN(val)?'var(--tm)':textColor}">${isNaN(val)?'--':val}</span>
+      </div>`;
+  });
+  barsList.innerHTML = html;
+  preview.style.display = hasAny ? 'block' : 'none';
+}
+
+function generateRandomStudent() {
+  const classes = Object.keys(SUBJECT_MAP);
+  const cls = classes[Math.floor(Math.random()*classes.length)];
+  const name = RANDOM_NAMES[Math.floor(Math.random()*RANDOM_NAMES.length)];
+  const att = Math.floor(Math.random()*35)+65; // 65–99
+  const rank = Math.floor(Math.random()*30)+1;
+
+  document.getElementById('ai-name').value = name;
+  document.getElementById('ai-class').value = cls;
+  document.getElementById('ai-att').value = att;
+  document.getElementById('ai-rank').value = rank;
+
+  buildMarksGrid(cls);
+
+  const subjects = getSubjectsForClass(cls);
+  // Give each student a slightly different profile
+  const baseScore = 50 + Math.floor(Math.random()*30);
+  subjects.forEach(sub => {
+    const variance = Math.floor(Math.random()*35) - 10;
+    const score = Math.max(30, Math.min(100, baseScore + variance));
+    const inp = document.getElementById('mark-'+sub.replace(/\s/g,'_'));
+    if (inp) {
+      inp.value = score;
+      colorMarkInput(inp);
+    }
+  });
+  updateBarPreview();
+}
+
+function getMarksData() {
+  const cls = document.getElementById('ai-class').value || DEFAULT_CLASS;
+  const subjects = getSubjectsForClass(cls);
+  const marks = {};
+  subjects.forEach(sub => {
+    const inp = document.getElementById('mark-'+sub.replace(/\s/g,'_'));
+    if (inp && inp.value !== '') marks[sub] = parseInt(inp.value);
+  });
+  return marks;
+}
+
+function setAnalyseLoading(loading) {
+  const btn = document.getElementById('btn-analyse');
+  const txt = document.getElementById('btn-analyse-txt');
+  btn.disabled = loading;
+  txt.textContent = loading ? 'Analysing…' : 'Analyse Student';
+  document.getElementById('ai-empty-state').style.display = 'none';
+  document.getElementById('ai-loading').style.display = loading ? 'flex' : 'none';
+  document.getElementById('ai-result-area').style.display = 'none';
+}
+
+function setAnalyseScore(score) {
+  const circ = 2 * Math.PI * 32;
+  const arc = document.getElementById('ai-arc');
+  if (!arc) return;
+  arc.style.strokeDasharray = circ;
+  arc.style.strokeDashoffset = circ - (score / 100) * circ;
+  const color = score >= 80 ? '#26d98b' : score >= 60 ? '#f5a623' : '#ff4757';
+  arc.style.stroke = color;
+  document.getElementById('ai-score-num').textContent = score;
+  document.getElementById('ai-score-num').style.color = color;
+  const verdict = score >= 85 ? 'Excellent' : score >= 70 ? 'Good' : score >= 55 ? 'Needs Attention' : 'Critical';
+  const vEl = document.getElementById('ai-score-verdict');
+  vEl.textContent = verdict;
+  vEl.style.color = color;
+}
+
+// ── Local AI Analysis Engine (no API key needed) ──
+function runAIAnalysis() {
+  const name = document.getElementById('ai-name').value.trim() || 'Student';
+  const cls = document.getElementById('ai-class').value || DEFAULT_CLASS;
+  const att = parseInt(document.getElementById('ai-att').value) || 90;
+  const rank = parseInt(document.getElementById('ai-rank').value) || 5;
+  const marks = getMarksData();
+
+  if (Object.keys(marks).length === 0) {
+    buildMarksGrid(cls);
+    alert('Please enter at least some subject marks, or use 🎲 Random Student.');
+    return;
+  }
+
+  setAnalyseLoading(true);
+
+  // Simulate brief "thinking" delay for UX
+  setTimeout(() => {
+    const result = generateLocalAnalysis(name, cls, att, rank, marks);
+    renderAnalysisResult(result, name, cls);
+  }, 900);
+}
+
+function generateLocalAnalysis(name, cls, att, rank, marks) {
+  const vals = Object.values(marks);
+  const avg = vals.reduce((a,b)=>a+b,0) / vals.length;
+  const sorted = Object.entries(marks).sort((a,b)=>b[1]-a[1]);
+  const strong = sorted.filter(([,v])=>v>=85);
+  const weak = sorted.filter(([,v])=>v<75).reverse(); // worst first
+  const mid = sorted.filter(([,v])=>v>=75&&v<85);
+  const firstName = name.split(' ')[0];
+  const totalSubj = vals.length;
+  const attLow = att < 80;
+  const attBorderline = att >= 80 && att < 85;
+
+  // ── Exam Readiness Score ──
+  const avgScore40 = Math.min(40, (avg / 100) * 40);
+  const attScore20 = Math.min(20, (att / 100) * 20);
+  const classSize = 40;
+  const rankScore20 = Math.max(0, 20 - ((rank / classSize) * 20));
+  const balanceScore20 = weak.length === 0 ? 20 : weak.length === 1 ? 14 : weak.length === 2 ? 8 : 4;
+  const examScore = Math.round(avgScore40 + attScore20 + rankScore20 + balanceScore20);
+
+  // ── Verdict Description ──
+  const verdicts = {
+    excellent: [
+      `${firstName} is exceptionally well-prepared and on track for outstanding board results.`,
+      `${firstName} demonstrates strong mastery across subjects and is ready for high-stakes exams.`,
+    ],
+    good: [
+      `${firstName} is in good shape for upcoming exams with targeted effort on weaker areas.`,
+      `${firstName} shows solid preparation with clear room to push into the top tier.`,
+    ],
+    needs: [
+      `${firstName} needs focused intervention in key subjects to be exam-ready.`,
+      `${firstName} has potential but requires structured improvement before exams.`,
+    ],
+    critical: [
+      `${firstName} is at significant risk and requires immediate academic support.`,
+      `Urgent attention needed — ${firstName}'s current scores may impact board performance.`,
+    ]
+  };
+  const vKey = examScore>=80?'excellent':examScore>=65?'good':examScore>=50?'needs':'critical';
+  const verdictDesc = verdicts[vKey][rank % 2];
+
+  // ── Academic Summary ──
+  const topSubj = sorted[0];
+  const bottomSubj = sorted[sorted.length-1];
+  const gradeStr = avg>=85?'exceptional':avg>=75?'above-average':avg>=65?'moderate':'below-average';
+  let summary = `${name} is a ${cls} student with a ${gradeStr} academic profile, averaging ${avg.toFixed(1)}% across ${totalSubj} subjects and holding Class Rank #${rank}. `;
+  if (strong.length > 0) {
+    summary += `${firstName} shows clear strength in ${strong.map(([s])=>s).join(' and ')} (${strong.map(([,v])=>v).join('/')}/100), which ${strong.length>1?'are':'is'} a strong foundation. `;
+  }
+  if (weak.length > 0) {
+    summary += `However, performance in ${weak.map(([s])=>s).join(' and ')} (${weak.map(([,v])=>v).join('/')}/100) requires focused attention before the upcoming exams. `;
+  } else {
+    summary += `The subject performance is well-rounded with no critical weak areas. `;
+  }
+  if (attLow) {
+    summary += `Attendance at ${att}% is below the required 80% threshold and is a serious concern that must be addressed immediately.`;
+  } else if (attBorderline) {
+    summary += `Attendance at ${att}% is borderline — consistent presence will be key to maintaining momentum.`;
+  } else {
+    summary += `Attendance at ${att}% is commendable and reflects strong academic commitment.`;
+  }
+
+  // ── Strengths (top 2) ──
+  const strengthItems = sorted.slice(0,2).map(([sub,score]) => {
+    const g = score>=91?'A1 grade':score>=81?'A2 grade':'solid B1 grade';
+    const msgs = [
+      `${sub} — ${score}/100 (${g}): Consistently strong performance; leverage this as a confidence anchor.`,
+      `${sub} — ${score}/100: A clear academic strength showing deep understanding of the subject.`,
+      `${sub} — ${score}/100 (${g}): Outstanding command; this subject is a scoring advantage in board exams.`,
+    ];
+    return msgs[score % msgs.length];
+  });
+
+  // ── Improvement Areas (bottom 2) ──
+  const improvementItems = (weak.length > 0 ? weak : sorted.slice(-2)).slice(0,2).map(([sub,score]) => {
+    const gap = 75 - score;
+    const msgs = [
+      `${sub} — ${score}/100: ${gap > 0 ? `Needs ${gap} more marks to cross the 75% threshold.` : 'Just above passing — needs consistent effort to stabilize.'} Focus on NCERT fundamentals.`,
+      `${sub} — ${score}/100: Performance is dragging down overall average. Daily practice and revision of key chapters recommended.`,
+      `${sub} — ${score}/100: Scoring gap here is the primary obstacle to a higher rank. Targeted weekly tests will help.`,
+    ];
+    return msgs[score % msgs.length];
+  });
+
+  // ── Recommendations (3, fully personalized) ──
+  const recs = [];
+
+  // Rec 1: Weakest subject strategy
+  if (weak.length > 0) {
+    const ws = weak[0][0]; const wv = weak[0][1];
+    recs.push({
+      title: `${ws} Emergency Plan`,
+      detail: `With ${ws} at ${wv}/100, dedicate a minimum 45-minute daily session exclusively to this subject. Start with NCERT chapter summaries, then solve the last 5 years' CBSE board questions. Set a target of reaching 75+ within 3 weeks using the spaced-repetition method.`
+    });
+  } else {
+    recs.push({
+      title: `Push for A1 Grades Across the Board`,
+      detail: `With no subject below 75%, ${firstName} is well-placed to aim for A1 (91+) in all subjects. Focus on solving CBSE sample papers under timed conditions to identify any remaining gaps before the board exams.`
+    });
+  }
+
+  // Rec 2: Leverage strengths / study pattern
+  if (strong.length > 0) {
+    const ss = strong[0][0];
+    recs.push({
+      title: `Use ${ss} as a Study Anchor`,
+      detail: `${firstName}'s strength in ${ss} (${strong[0][1]}/100) can be used strategically. Schedule ${ss} revision early in study sessions as a warm-up to build momentum, then transition to weaker subjects while the mind is still sharp. This builds confidence and maximizes productive study time.`
+    });
+  } else {
+    recs.push({
+      title: `Build a Consistent Study Routine`,
+      detail: `${firstName}'s marks are clustered in the mid-range. A structured timetable — 3 subjects per day, rotating across the week — will prevent over-focus on any single area and ensure even improvement across all ${totalSubj} subjects.`
+    });
+  }
+
+  // Rec 3: Attendance / exam strategy
+  if (attLow) {
+    recs.push({
+      title: `Attendance Recovery — Urgent`,
+      detail: `At ${att}%, ${firstName} is below the CBSE minimum attendance requirement of 75% (with risk below 80%). Missing more classes will jeopardize eligibility for board exams. Commit to zero unplanned absences for the remainder of the term. Request teacher notes for any previously missed content immediately.`
+    });
+  } else if (avg >= 80) {
+    recs.push({
+      title: `Mock Exam Strategy for Top Rank`,
+      detail: `${firstName} is performing at ${avg.toFixed(1)}% average with Rank #${rank}. Simulate full 3-hour board exam sessions every weekend using official CBSE sample papers. Focus on time management — aim to finish with 15 minutes to spare for review. This alone can push the rank into the top 3.`
+    });
+  } else {
+    recs.push({
+      title: `Revision Cycle & Self-Testing`,
+      detail: `${firstName} should implement a 3-day revision cycle: Day 1 – read notes, Day 2 – solve practice questions, Day 3 – self-test without notes. Cover all ${totalSubj} subjects within each cycle. This proven technique improves retention by up to 40% before high-stakes exams.`
+    });
+  }
+
+  return { examScore, verdictDesc, summary, strengthItems, improvementItems, recs };
+}
+
+function renderAnalysisResult(result, name, cls) {
+  setAnalyseLoading(false);
+  document.getElementById('ai-result-area').style.display = 'block';
+
+  setAnalyseScore(result.examScore);
+  document.getElementById('ai-score-desc').textContent = result.verdictDesc;
+
+  const badge = document.getElementById('ai-student-badge');
+  badge.textContent = `${name} · ${cls}`;
+  badge.style.display = 'block';
+
+  document.getElementById('ai-summary').textContent = result.summary;
+
+  document.getElementById('ai-strengths').innerHTML =
+    result.strengthItems.map(s=>`<div class="ai-strength-item">✅ ${s}</div>`).join('');
+
+  document.getElementById('ai-improvements').innerHTML =
+    result.improvementItems.map(s=>`<div class="ai-improve-item">🔶 ${s}</div>`).join('');
+
+  document.getElementById('ai-recommendations').innerHTML =
+    result.recs.map((r,i)=>
+      `<div class="ai-rec-item"><div class="ai-rec-num">RECOMMENDATION ${i+1}</div><strong>${r.title}</strong><br/>${r.detail}</div>`
+    ).join('');
+}
+
+// Auto-fill AI Analyser from current user profile
+function autoFillAIAnalyser() {
+  const u = currentUser;
+  if (!u) return;
+  const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || 'Student';
+  const cls = u.cls || DEFAULT_CLASS;
+  const nameEl = document.getElementById('ai-name');
+  const clsEl = document.getElementById('ai-class');
+  const attEl = document.getElementById('ai-att');
+  const rankEl = document.getElementById('ai-rank');
+  if (nameEl) nameEl.value = name;
+  if (clsEl) { clsEl.value = cls; }
+  if (attEl) attEl.value = u.att || '90';
+  if (rankEl) rankEl.value = u.rank || '5';
+  buildMarksGrid(cls);
+  // Fill marks from profile
+  const marks = u.marks || {};
+  Object.entries(marks).forEach(([sub, score]) => {
+    const inp = document.getElementById('mark-'+sub.replace(/\s/g,'_'));
+    if (inp) { inp.value = score; colorMarkInput(inp); }
+  });
+  updateBarPreview();
+}
+
+// Init marks grid when class changes
+document.addEventListener('DOMContentLoaded', () => {
+  const classSelect = document.getElementById('ai-class');
+  if (classSelect) {
+    classSelect.addEventListener('change', () => buildMarksGrid(classSelect.value));
+    buildMarksGrid(DEFAULT_CLASS);
+    classSelect.value = DEFAULT_CLASS;
+  }
+});
+
+// ═══════════════════════════════════════
+// INIT ON LOAD
+// ═══════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Check for existing session
+  const sessionKey = loadFromStorage('ss_session');
+  if (sessionKey) {
+    const accounts = loadFromStorage('ss_accounts') || {};
+    const user = accounts[sessionKey];
+    if (user) {
+      currentUser = user;
+      launchApp();
+      return;
+    }
+  }
+  // No session — show auth
+  document.getElementById('auth-screen').classList.remove('hidden');
+});
+</script>
+</body>
+</html>
